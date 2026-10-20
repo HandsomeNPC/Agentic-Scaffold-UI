@@ -1,0 +1,100 @@
+import { defineStore } from 'pinia';
+
+import { store } from '@/store';
+import type { TRouterInfo, TTabRouterType } from '@/types/interface';
+
+const homeRoute: Array<TRouterInfo> = [
+  {
+    path: '/index',
+    routeIdx: 0,
+    title: { zh_CN: '首页', en_US: '首页' },
+    name: 'Index',
+    isHome: true,
+  },
+];
+
+const state = {
+  tabRouterList: homeRoute,
+  isRefreshing: false,
+};
+
+// 不需要做多标签tabs页缓存的列表 值为每个页面对应的name 如 DashboardDetail
+// const ignoreCacheRoutes = ['DashboardDetail'];
+const ignoreCacheRoutes = ['login'];
+
+export const useTabsRouterStore = defineStore('tabsRouter', {
+  state: () => state,
+  getters: {
+    tabRouters: (state: TTabRouterType) => state.tabRouterList,
+    refreshing: (state: TTabRouterType) => state.isRefreshing,
+  },
+  actions: {
+    // 处理刷新
+    toggleTabRouterAlive(routeIdx: number) {
+      this.isRefreshing = !this.isRefreshing;
+      this.tabRouters[routeIdx].isAlive = !this.tabRouters[routeIdx].isAlive;
+    },
+    // 处理新增
+    appendTabRouterList(newRoute: TRouterInfo) {
+      // 不要将判断条件newRoute.meta.keepAlive !== false修改为newRoute.meta.keepAlive，starter默认开启保活，所以meta.keepAlive未定义时也需要进行保活，只有显式说明false才禁用保活。
+      const needAlive = !ignoreCacheRoutes.includes(newRoute.name as string) && newRoute.meta?.keepAlive !== false;
+      if (!this.tabRouters.some((route: TRouterInfo) => route.path === newRoute.path)) {
+        this.tabRouterList = this.tabRouterList.concat({ ...newRoute, isAlive: needAlive });
+      }
+    },
+    // 处理关闭当前
+    subtractCurrentTabRouter(newRoute: TRouterInfo) {
+      const { routeIdx } = newRoute;
+      if (routeIdx === undefined) return;
+      this.tabRouterList = this.tabRouterList.slice(0, routeIdx).concat(this.tabRouterList.slice(routeIdx + 1));
+    },
+    // 处理关闭右侧
+    subtractTabRouterBehind(newRoute: TRouterInfo) {
+      const { routeIdx } = newRoute;
+      if (routeIdx === undefined) return;
+      const homeIdx: number = this.tabRouters.findIndex((route: TRouterInfo) => route.isHome);
+      let tabRouterList: Array<TRouterInfo> = this.tabRouterList.slice(0, routeIdx + 1);
+      if (routeIdx < homeIdx) {
+        tabRouterList = tabRouterList.concat(homeRoute);
+      }
+      this.tabRouterList = tabRouterList;
+    },
+    // 处理关闭左侧
+    subtractTabRouterAhead(newRoute: TRouterInfo) {
+      const { routeIdx } = newRoute;
+      if (routeIdx === undefined) return;
+      const homeIdx: number = this.tabRouters.findIndex((route: TRouterInfo) => route.isHome);
+      let tabRouterList: Array<TRouterInfo> = this.tabRouterList.slice(routeIdx);
+      if (routeIdx > homeIdx) {
+        tabRouterList = homeRoute.concat(tabRouterList);
+      }
+      this.tabRouterList = tabRouterList;
+    },
+    // 处理关闭其他
+    subtractTabRouterOther(newRoute: TRouterInfo) {
+      const { routeIdx } = newRoute;
+      if (routeIdx === undefined) return;
+      const homeIdx: number = this.tabRouters.findIndex((route: TRouterInfo) => route.isHome);
+      this.tabRouterList = routeIdx === homeIdx ? homeRoute : homeRoute.concat([this.tabRouterList?.[routeIdx]]);
+    },
+    removeTabRouterList() {
+      // 保留首页固定标签
+      this.tabRouterList = [...homeRoute];
+    },
+    /** 按路径移除单个标签（提交后返回父页时清理当前编辑标签） */
+    removeTabByPath(path: string) {
+      if (!path) return;
+      const idx = this.tabRouterList.findIndex((r) => r.path === path);
+      if (idx === -1) return;
+      this.tabRouterList = this.tabRouterList.slice(0, idx).concat(this.tabRouterList.slice(idx + 1));
+    },
+    initTabRouterList(newRoutes: TRouterInfo[]) {
+      newRoutes?.forEach((route: TRouterInfo) => this.appendTabRouterList(route));
+    },
+  },
+  persist: true,
+});
+
+export function getTabsRouterStore() {
+  return useTabsRouterStore(store);
+}

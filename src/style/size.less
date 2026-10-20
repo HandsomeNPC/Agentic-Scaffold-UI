@@ -1,0 +1,39 @@
+// 布局大小切换：TDesign 无 Element 的全局 size context，
+// 通过在 <html> 上设置 data-size 属性覆盖 TDesign 尺寸 CSS 变量实现。
+// medium 为默认（不改写）。small/large 整体把 --td-comp-size-* 平移 ±2 档。
+
+[data-size='small'] {
+  --td-comp-size-xxxs: var(--td-size-4);
+  --td-comp-size-xxs: var(--td-size-5);
+  --td-comp-size-xs: var(--td-size-6);
+  --td-comp-size-s: var(--td-size-7);
+  --td-comp-size-m: var(--td-size-8);
+  --td-comp-size-l: var(--td-size-9);
+  --td-comp-size-xl: var(--td-size-10);
+  --td-comp-size-xxl: var(--td-size-11);
+  --td-comp-size-xxxl: var(--td-size-12);
+  --td-comp-size-xxxxl: var(--td-size-13);
+  --td-comp-size-xxxxxl: var(--td-size-14);
+
+  --td-comp-paddingLR-xs: 4px;
+  --td-comp-paddingLR-s: 8px;
+  --td-comp-paddingLR-m: 12px;
+  --td-comp-paddingLR-l: 16px;
+}
+
+[data-size='large'] {
+  --td-comp-size-xxxs: var(--td-size-8);
+  --td-comp-size-xxs: var(--td-size-9);
+  --td-comp-size-xs: var(--td-size-10);
+  --td-comp-size-s: var(--td-size-11);
+  --td-comp-size-m: var(--td-size-12);
+  --td-comp-size-l: var(--td-size-13);
+  --td-comp-size-xl: var(--td-size-14);
+  --td-comp-size-xxl: var(--td-size-15);
+  --td-comp-size-xxxl: var(--td-size-16);
+
+  --td-comp-paddingLR-xs: 12px;
+  --td-comp-paddingLR-s: 16px;
+  --td-comp-paddingLR-m: 24px;
+  --td-comp-paddingLR-l: 32px;
+}
