@@ -69,7 +69,6 @@ function createAgentChat() {
       const messages = AGUIAdapter.convertHistoryMessages(data?.messages ?? []);
       chatbot.value?.setMessages(messages, 'replace');
       setInterrupts(data?.interrupts ?? []);
-      if (data?.running) MessagePlugin.info('该会话仍有任务在后台运行，稍后刷新可查看结果');
     } finally {
       loadingHistory.value = false;
     }

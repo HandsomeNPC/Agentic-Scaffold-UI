@@ -173,7 +173,11 @@ const navToHelper = () => {
   &-menu-fixed {
     position: fixed;
     top: 0;
+    left: 0;
+    right: var(--agent-sidebar-width, 0);
+    width: auto;
     z-index: 1001;
+    transition: right 0.3s;
 
     :deep(.t-head-menu__inner) {
       padding-right: var(--td-comp-margin-xl);
@@ -181,7 +185,6 @@ const navToHelper = () => {
 
     &-side {
       left: 232px;
-      right: 0;
       z-index: 10;
       width: auto;
       transition: all 0.3s;

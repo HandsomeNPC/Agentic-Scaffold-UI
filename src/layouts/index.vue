@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="layout-root">
     <template v-if="setting.layout.value === 'side'">
       <t-layout key="side" :class="mainLayoutCls">
         <t-aside><layout-side-nav /></t-aside>
@@ -20,7 +20,7 @@
       </t-layout>
     </template>
     <setting-com />
-    <agent-float />
+    <agent-side-bar />
   </div>
 </template>
 <script setup lang="ts">
@@ -30,7 +30,7 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { AgentFloat } from '@/agent';
+import { AgentSideBar } from '@/agent';
 import { prefix } from '@/config/global';
 import { useSettingStore, useTabsRouterStore } from '@/store';
 
@@ -73,4 +73,10 @@ watch(
   },
 );
 </script>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+// 智能助手侧边栏打开时给页面让出右侧空间（变量由 AgentSideBar 维护）
+.layout-root {
+  padding-right: var(--agent-sidebar-width, 0);
+  transition: padding-right 0.3s;
+}
+</style>

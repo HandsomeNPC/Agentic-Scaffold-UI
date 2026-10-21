@@ -7,7 +7,6 @@
         :value="currentThreadId"
         class="agent-panel__thread"
         placeholder="选择会话"
-        size="small"
         @change="onSwitch"
       >
         <template #option="{ option }">
@@ -20,12 +19,12 @@
         </template>
       </t-select>
       <t-tooltip content="新对话">
-        <t-button :disabled="busy" shape="square" size="small" variant="text" @click="newThread">
+        <t-button :disabled="busy" shape="square" variant="text" @click="newThread">
           <template #icon><chat-bubble-add-icon /></template>
         </t-button>
       </t-tooltip>
       <t-tooltip content="关闭">
-        <t-button shape="square" size="small" variant="text" @click="emit('close')">
+        <t-button shape="square" variant="text" @click="emit('close')">
           <template #icon><close-icon /></template>
         </t-button>
       </t-tooltip>
@@ -163,11 +162,20 @@ watch(chatbotRef, (inst) => {
   background: var(--td-bg-color-container);
 
   &__header {
+    // 与系统顶部 Header 等高（--td-comp-size-xxxl，随 size 切换），图标随之放大。
     display: flex;
-    gap: 4px;
+    flex: 0 0 auto;
     align-items: center;
-    padding: 8px 8px 8px 12px;
+    gap: 8px;
+    height: var(--td-comp-size-xxxl);
+    padding: 0 12px 0 16px;
     border-bottom: 1px solid var(--td-component-stroke);
+
+    // 按钮图标统一放大，对齐 Header 操作区观感
+    :deep(.t-button .td-icon),
+    :deep(.t-button svg) {
+      font-size: 22px;
+    }
   }
 
   &__thread {
@@ -191,6 +199,7 @@ watch(chatbotRef, (inst) => {
 
   &__option-del {
     flex-shrink: 0;
+    font-size: 18px;
     color: var(--td-text-color-placeholder);
 
     &:hover {
@@ -201,11 +210,25 @@ watch(chatbotRef, (inst) => {
   &__body {
     flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    // TDesign Loading 的包裹层要撑满，否则 height:100% 落空会让 sender 溢出被裁。
+    :deep(.t-loading),
+    :deep(.t-loading__parent) {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   &__chat {
-    height: 100%;
-    padding: 0 8px 8px;
+    flex: 1;
+    min-height: 0;
+    box-sizing: border-box;
+    // 聊天框四周留白：底部留足空间，避免 sender 输入框下半部分被侧边栏 overflow:hidden 裁掉。
+    padding: 12px 12px 16px;
   }
 }
 </style>
