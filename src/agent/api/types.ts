@@ -8,6 +8,16 @@ export interface ThreadVo {
   updateTime?: string;
 }
 
+/** 会话列表查询条件，对齐后端 bo.AiThreadQueryBo + PageQuery。空值后端不筛。 */
+export interface ThreadQuery {
+  pageNum?: number;
+  pageSize?: number;
+  /** 标题，模糊匹配 */
+  title?: string;
+  /** Agent 类型，精确匹配 */
+  agentType?: string;
+}
+
 export type ResumeStatus = 'resolved' | 'cancelled';
 
 /** 中断恢复条目，对齐后端 bo.ChatRequest.Resume []types.ResumeEntry */

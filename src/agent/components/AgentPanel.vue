@@ -70,6 +70,9 @@ import { toolcallActions } from './tools/register';
 
 const emit = defineEmits<{ close: [] }>();
 
+// 侧边栏只列 demo agent 的会话。与后端 agent.AgentNameDemo 对齐。
+const AGENT_TYPE = 'demo';
+
 const threads = ref<ThreadVo[]>([]);
 const activeThreadId = ref('');
 const inputValue = ref('');
@@ -151,7 +154,7 @@ async function handleToolCallRespond(_toolcall: ToolCall, response: any) {
 
 async function refreshThreads() {
   try {
-    const res = await listThreads();
+    const res = await listThreads({ agentType: AGENT_TYPE });
     threads.value = res.data?.rows ?? [];
   } catch (err) {
     notifyError(err, '加载会话列表失败');
@@ -179,7 +182,7 @@ async function selectThread(threadId: string) {
 
 async function newThread() {
   try {
-    const res = await createThread();
+    const res = await createThread({ agentType: AGENT_TYPE });
     const info = res.data!;
     threads.value = [info, ...threads.value];
     chatEngine.value?.clearMessages();

@@ -23,6 +23,13 @@
         <template #icon><chat-bubble-add-icon /></template>
       </t-button>
     </t-tooltip>
+    <t-popconfirm content="删除当前会话及全部消息？" @confirm="emit('remove', activeThreadId)">
+      <t-tooltip content="删除对话">
+        <t-button :disabled="disabled || !activeThreadId" shape="square" variant="text">
+          <template #icon><delete-icon /></template>
+        </t-button>
+      </t-tooltip>
+    </t-popconfirm>
     <t-tooltip content="关闭">
       <t-button shape="square" variant="text" @click="emit('close')">
         <template #icon><close-icon /></template>
@@ -31,7 +38,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-/** 对话面板顶部工具栏：会话切换、删除、新建、关闭。 */
+/** 对话面板顶部工具栏：会话切换、新建、删除当前会话、关闭。 */
 import { ChatBubbleAddIcon, CloseIcon, DeleteIcon } from 'tdesign-icons-vue-next';
 import { computed } from 'vue';
 

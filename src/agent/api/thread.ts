@@ -2,13 +2,13 @@ import type { PageResult } from '@/api/types';
 import type { AxiosPromise } from '@/utils/api-types';
 import request from '@/utils/request';
 
-import type { AbortVo, RenderVo, ThreadVo } from './types';
+import type { AbortVo, RenderVo, ThreadQuery, ThreadVo } from './types';
 
 // threadId 一律按字符串传：雪花 19 位超出 JS 安全整数，后端 jsonx 两种形态都认。
 
-/** 会话列表（仅当前用户），按更新时间倒序 */
-export const listThreads = (pageNum = 1, pageSize = 50): AxiosPromise<PageResult<ThreadVo>> =>
-  request({ url: '/ai/threads', method: 'get', params: { pageNum, pageSize } });
+/** 会话列表（仅当前用户），按创建时间倒序 */
+export const listThreads = (query: ThreadQuery = {}): AxiosPromise<PageResult<ThreadVo>> =>
+  request({ url: '/ai/threads', method: 'get', params: { pageNum: 1, pageSize: 50, ...query } });
 
 /** 创建会话。两个入参都可省略：agentType 留空由后端使用默认 Agent。 */
 export const createThread = (data?: { title?: string; agentType?: string }): AxiosPromise<ThreadVo> =>
