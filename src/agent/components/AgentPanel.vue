@@ -57,7 +57,7 @@ import {
   useChat,
 } from '@tdesign-vue-next/chat';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 
 import { getToken } from '@/utils/auth';
 import { isHandledRequestError } from '@/utils/request';
@@ -128,6 +128,25 @@ const listRef = ref<{ scrollToBottom: (opts: { behavior: 'auto' | 'smooth' }) =>
 
 const busy = computed(() => status.value === 'pending' || status.value === 'streaming');
 
+/**
+ * 每轮流式结束（complete / stop / error）后存展示快照，刷新/切走都能恢复。
+ *
+ * 不能靠 await sendUserMessage：引擎里它没 await 内部的 sendRequest，建完消息就
+ * resolve 了，那时存下来的只有用户消息和一条空的 pending 气泡。改为盯 status
+ * 由忙转闲。runThreadId 记开跑时的会话：流式期间用户可能切走，只写自己那条。
+ */
+let runThreadId = '';
+watch(busy, (isBusy, wasBusy) => {
+  if (isBusy) {
+    runThreadId = activeThreadId.value;
+    return;
+  }
+  if (wasBusy && runThreadId && activeThreadId.value === runThreadId) {
+    persistMessages(runThreadId);
+  }
+  runThreadId = '';
+});
+
 const messageProps: TdChatMessageConfig = {
   user: { variant: 'base', placement: 'right' },
   assistant: { variant: 'text', placement: 'left', chatContentProps: { markdown: {} } },
@@ -148,23 +167,12 @@ function scrollToBottom(behavior: 'auto' | 'smooth' = 'auto') {
   nextTick(() => listRef.value?.scrollToBottom({ behavior }));
 }
 
-/**
- * 工具卡片的 respond 回调。
- *
- * resumeRun 与 sendUserMessage 一样等整流露式结束才 resolve，结束后同样要落盘——
- * 否则恢复的那轮气泡刷新后会丢。守卫同 handleSend：流式期间用户可能切走，只写
- * 自己还活着的那条会话。
- */
+/** 工具卡片的 respond 回调。落盘由 busy 的 watch 统一处理。 */
 async function handleToolCallRespond(_toolcall: ToolCall, response: any) {
-  const sentThreadId = activeThreadId.value;
   try {
     await chatEngine.value?.resumeRun({ resume: response } as ChatRequestParams);
   } catch (err) {
     notifyError(err, '恢复执行失败');
-  } finally {
-    if (activeThreadId.value === sentThreadId) {
-      await persistMessages(sentThreadId);
-    }
   }
 }
 
@@ -253,20 +261,12 @@ async function handleSend(prompt: string) {
   }
 
   inputValue.value = '';
-  // 捕获发送时的会话：流式期间用户可能切走，落盘只写自己还活着的那条。
-  const sentThreadId = activeThreadId.value;
   try {
-    // sendUserMessage 要等整轮流式结束才 resolve，先发起再滚动
-    const sending = chatEngine.value?.sendUserMessage({ prompt: text });
+    // 建完消息就 resolve，不等流式结束；落盘由 busy 的 watch 负责。
+    await chatEngine.value?.sendUserMessage({ prompt: text });
     scrollToBottom('smooth');
-    await sending;
   } catch (err) {
     notifyError(err, '发送失败');
-  } finally {
-    if (activeThreadId.value === sentThreadId) {
-      // 每轮对话结束后存展示快照，刷新/切走都能恢复。
-      await persistMessages(sentThreadId);
-    }
   }
 }
 
