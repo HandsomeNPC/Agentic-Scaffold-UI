@@ -77,8 +77,8 @@ import { toolcallActions } from './tools/register';
 
 const emit = defineEmits<{ close: [] }>();
 
-// 侧边栏只列 demo agent 的会话。与后端 agent.AgentNameDemo 对齐。
-const AGENT_TYPE = 'demo';
+// 侧边栏只列 assistant agent 的会话。与后端 agent.AgentNameAssistant 对齐。
+const AGENT_TYPE = 'assistant';
 
 const threads = ref<ThreadVo[]>([]);
 const activeThreadId = ref('');
