@@ -1,4 +1,4 @@
-import type { ChatMessagesData, ChatServiceConfig, SSEChunkData } from '@tdesign-vue-next/chat';
+import type { ChatServiceConfig, IChatEngine, SSEChunkData } from '@tdesign-vue-next/chat';
 import { AGUIAdapter } from '@tdesign-vue-next/chat';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ref, shallowRef } from 'vue';
@@ -15,24 +15,11 @@ export const AGENT_TYPE = 'supervisor';
 
 const baseApi = import.meta.env.VITE_APP_BASE_API;
 
-/** Chatbot 组件实例上本模块用到的方法（Omi 组件，类型未导出） */
-export interface ChatbotInstance {
-  setMessages: (messages: ChatMessagesData[], mode?: 'replace' | 'prepend' | 'append') => void;
-  sendUserMessage: (params: { prompt: string }) => Promise<void>;
-  sendAIMessage: (options: {
-    params?: Record<string, unknown>;
-    content?: any[];
-    sendRequest?: boolean;
-  }) => Promise<void>;
-  abortChat: () => Promise<void>;
-  scrollList?: (opts: { to: 'bottom' | 'top'; behavior: 'auto' | 'smooth' }) => void;
-}
-
 /**
  * 悬浮对话框的会话状态与通信。全局单例：悬浮框关掉再打开，状态不丢。
  *
  * 通信全部走 /ai/threads/*：
- *  - 对话是 SSE（Chatbot 内部的 fetch，protocol=agui），请求体由 onRequest 组装成后端
+ *  - 对话是 SSE（ChatEngine 内部的 fetch，protocol=agui），请求体由 onRequest 组装成后端
  *    bo.ChatRequest 的形状 {threadId, prompt, messageID, state, resume}；
  *  - 其余是普通 axios 请求，复用全局的 token / 401 处理。
  */
@@ -42,7 +29,8 @@ function createAgentChat() {
   const loadingHistory = ref(false);
   /** 当前待确认的中断，按 toolCallId 索引，卡片据此渲染审批面板 */
   const interrupts = ref<Record<string, AgentInterrupt>>({});
-  const chatbot = shallowRef<ChatbotInstance | null>(null);
+  /** 对话引擎，由 AgentPanel 里的 useChat 创建后挂上来；面板卸载时置空 */
+  const chatEngine = shallowRef<IChatEngine | null>(null);
 
   /**
    * 下一次请求要带的 resume。sendAIMessage 的 params 不会进 onRequest 以外的地方，
@@ -59,7 +47,7 @@ function createAgentChat() {
   async function switchThread(threadId: string) {
     if (!threadId) return;
     // 正在输出时切走：只断本地流，不 abort 后端（loop 跨请求常驻，回来还能看到落库结果）
-    await chatbot.value?.abortChat().catch(() => {});
+    await chatEngine.value?.abortChat().catch(() => {});
     currentThreadId.value = threadId;
     interrupts.value = {};
     loadingHistory.value = true;
@@ -67,7 +55,7 @@ function createAgentChat() {
       const res = await renderThread(threadId);
       const data = res.data;
       const messages = AGUIAdapter.convertHistoryMessages(data?.messages ?? []);
-      chatbot.value?.setMessages(messages, 'replace');
+      chatEngine.value?.setMessages(messages, 'replace');
       setInterrupts(data?.interrupts ?? []);
     } finally {
       loadingHistory.value = false;
@@ -80,7 +68,7 @@ function createAgentChat() {
     threads.value = [t, ...threads.value];
     currentThreadId.value = t.threadId;
     interrupts.value = {};
-    chatbot.value?.setMessages([], 'replace');
+    chatEngine.value?.setMessages([], 'replace');
     return t;
   }
 
@@ -90,7 +78,7 @@ function createAgentChat() {
     if (threadId === currentThreadId.value) {
       currentThreadId.value = '';
       interrupts.value = {};
-      chatbot.value?.setMessages([], 'replace');
+      chatEngine.value?.setMessages([], 'replace');
     }
   }
 
@@ -126,12 +114,12 @@ function createAgentChat() {
       it.toolCallId === toolCallId ? { status: approved ? 'resolved' : 'cancelled', payload } : { status: 'resolved' },
     );
     interrupts.value = {};
-    await chatbot.value?.sendAIMessage({ params: {}, sendRequest: true });
+    await chatEngine.value?.sendAIMessage({ params: {}, sendRequest: true });
   }
 
   /** 终止：先断本地流，再让后端停 loop（只断流的话后端 run 仍在跑） */
   async function stop() {
-    await chatbot.value?.abortChat().catch(() => {});
+    await chatEngine.value?.abortChat().catch(() => {});
     if (currentThreadId.value) await abortThread(currentThreadId.value).catch(() => {});
   }
 
@@ -186,7 +174,7 @@ function createAgentChat() {
     currentThreadId,
     loadingHistory,
     interrupts,
-    chatbot,
+    chatEngine,
     serviceConfig,
     refreshThreads,
     switchThread,
