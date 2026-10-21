@@ -44,7 +44,7 @@
 <script lang="ts" setup>
 import { computed, ref, watch } from 'vue';
 
-import type { ResumeEntry } from '../../api/types';
+import type { ResumeEntry } from '../../../api/types';
 
 /**
  * Demo 工具卡片(Human-in-the-Loop)。
