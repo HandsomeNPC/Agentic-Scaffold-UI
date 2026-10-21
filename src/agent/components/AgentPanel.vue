@@ -48,7 +48,6 @@ import type {
   ToolCallContent,
 } from '@tdesign-vue-next/chat';
 import {
-  AGUIAdapter,
   ChatList as TChatList,
   ChatMessage as TChatMessage,
   ChatSender as TChatSender,
@@ -63,7 +62,15 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import { getToken } from '@/utils/auth';
 import { isHandledRequestError } from '@/utils/request';
 
-import { abortThread, CHAT_ENDPOINT, createThread, deleteThread, listThreads, renderThread } from '../api/thread';
+import {
+  abortThread,
+  CHAT_ENDPOINT,
+  createThread,
+  deleteThread,
+  listThreads,
+  loadMessages,
+  saveMessages,
+} from '../api/thread';
 import type { ThreadVo } from '../api/types';
 import AgentHeader from './AgentHeader.vue';
 import { toolcallActions } from './tools/register';
@@ -143,12 +150,21 @@ function scrollToBottom(behavior: 'auto' | 'smooth' = 'auto') {
 
 /**
  * 工具卡片的 respond 回调。
+ *
+ * resumeRun 与 sendUserMessage 一样等整流露式结束才 resolve，结束后同样要落盘——
+ * 否则恢复的那轮气泡刷新后会丢。守卫同 handleSend：流式期间用户可能切走，只写
+ * 自己还活着的那条会话。
  */
 async function handleToolCallRespond(_toolcall: ToolCall, response: any) {
+  const sentThreadId = activeThreadId.value;
   try {
     await chatEngine.value?.resumeRun({ resume: response } as ChatRequestParams);
   } catch (err) {
     notifyError(err, '恢复执行失败');
+  } finally {
+    if (activeThreadId.value === sentThreadId) {
+      await persistMessages(sentThreadId);
+    }
   }
 }
 
@@ -161,22 +177,42 @@ async function refreshThreads() {
   }
 }
 
-/** 切换会话：用 /render 的历史替换消息列表。 */
+/** 切换会话：用展示消息快照恢复气泡列表。 */
 async function selectThread(threadId: string) {
   if (!threadId) return;
+  // 切走前先把当前会话的展示消息落盘，避免最后一轮没存上。
+  if (activeThreadId.value && activeThreadId.value !== threadId) {
+    await persistMessages(activeThreadId.value);
+  }
+
   activeThreadId.value = threadId;
 
   loadingHistory.value = true;
   try {
-    const res = await renderThread(threadId);
+    const res = await loadMessages(threadId);
     // 切会话期间用户可能又点了别的会话，过期响应直接丢掉。
     if (activeThreadId.value !== threadId) return;
-    chatEngine.value?.setMessages(AGUIAdapter.convertHistoryMessages((res.data?.messages ?? []) as never), 'replace');
+    // messages 即存即取已是 ChatMessagesData 形态，直接喂 setMessages，不再过
+    // convertHistoryMessages（那是给 AG-UI 历史形态用的，会反向二次转换）。
+    chatEngine.value?.setMessages((res.data?.messages ?? []) as never, 'replace');
     scrollToBottom();
   } catch (err) {
     if (activeThreadId.value === threadId) notifyError(err, '加载会话历史失败');
   } finally {
     if (activeThreadId.value === threadId) loadingHistory.value = false;
+  }
+}
+
+/**
+ * 把当前 messages 落盘为会话展示快照（前端展示用，不参与 Agent 上下文）。
+ * 失败仅告警，不影响对话本身。
+ */
+async function persistMessages(threadId: string) {
+  if (!threadId || !messages.value?.length) return;
+  try {
+    await saveMessages({ threadId, messages: messages.value });
+  } catch (err) {
+    if (!isHandledRequestError(err)) console.warn('[chat] 保存展示消息失败:', err);
   }
 }
 
@@ -217,6 +253,8 @@ async function handleSend(prompt: string) {
   }
 
   inputValue.value = '';
+  // 捕获发送时的会话：流式期间用户可能切走，落盘只写自己还活着的那条。
+  const sentThreadId = activeThreadId.value;
   try {
     // sendUserMessage 要等整轮流式结束才 resolve，先发起再滚动
     const sending = chatEngine.value?.sendUserMessage({ prompt: text });
@@ -224,6 +262,11 @@ async function handleSend(prompt: string) {
     await sending;
   } catch (err) {
     notifyError(err, '发送失败');
+  } finally {
+    if (activeThreadId.value === sentThreadId) {
+      // 每轮对话结束后存展示快照，刷新/切走都能恢复。
+      await persistMessages(sentThreadId);
+    }
   }
 }
 

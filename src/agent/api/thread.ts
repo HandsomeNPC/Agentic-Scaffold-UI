@@ -2,7 +2,7 @@ import type { PageResult } from '@/api/types';
 import type { AxiosPromise } from '@/utils/api-types';
 import request from '@/utils/request';
 
-import type { AbortVo, RenderVo, ThreadQuery, ThreadVo } from './types';
+import type { AbortVo, DisplayMessagesVo, SaveMessagesRequest, ThreadQuery, ThreadVo } from './types';
 
 // threadId 一律按字符串传：雪花 19 位超出 JS 安全整数，后端 jsonx 两种形态都认。
 
@@ -18,9 +18,13 @@ export const createThread = (data?: { title?: string; agentType?: string }): Axi
 export const deleteThread = (threadId: string): AxiosPromise<void> =>
   request({ url: '/ai/threads/delete', method: 'post', data: { threadId } });
 
-/** 渲染会话历史（含待审批状态与运行状态） */
-export const renderThread = (threadId: string): AxiosPromise<RenderVo> =>
-  request({ url: '/ai/threads/render', method: 'post', data: { threadId } });
+/** 存展示消息快照（前端展示用，不参与 Agent 上下文）。整份覆盖写。 */
+export const saveMessages = (data: SaveMessagesRequest): AxiosPromise<void> =>
+  request({ url: '/ai/threads/messages/save', method: 'post', data });
+
+/** 读展示消息快照，供刷新后恢复聊天气泡列表。无快照时后端回空数组。 */
+export const loadMessages = (threadId: string): AxiosPromise<DisplayMessagesVo> =>
+  request({ url: '/ai/threads/messages/load', method: 'post', data: { threadId } });
 
 /**
  * 终止会话当前运行。
