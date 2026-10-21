@@ -1,12 +1,12 @@
 <template>
   <div :style="wrapStyle" class="editor-wrap">
-    <Toolbar
+    <toolbar
       :default-config="toolbarConfig"
       :editor="editorRef"
       :mode="mode"
       style="border-bottom: 1px solid var(--td-component-stroke)"
     />
-    <Editor
+    <editor
       v-model="content"
       :default-config="editorConfig"
       :mode="mode"
@@ -15,9 +15,9 @@
     />
   </div>
 </template>
-
 <script lang="ts" setup>
 import '@wangeditor-next/editor/dist/css/style.css';
+
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue';
 import { LoadingPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
@@ -56,7 +56,7 @@ const editorRef = shallowRef<any>();
 const content = ref('');
 
 const baseUrl = import.meta.env.VITE_APP_BASE_API;
-const uploadOssUrl = baseUrl + '/resource/oss/upload';
+const uploadOssUrl = `${baseUrl}/resource/oss/upload`;
 const OSS_MARKER_RE = /oss:\/\/([\w-]+)/g;
 
 // URL → ossId 映射，上传/解析阶段填充
@@ -269,7 +269,6 @@ onBeforeUnmount(() => {
   editorRef.value?.destroy();
 });
 </script>
-
 <style scoped>
 .editor-wrap {
   z-index: 2;

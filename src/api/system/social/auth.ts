@@ -2,12 +2,12 @@ import request from '@/utils/request';
 
 // 获取跳转 URL（绑定第三方）
 export function authRouterUrl(source: string) {
-  return request({ url: '/auth/binding/' + source, method: 'get' });
+  return request({ url: `/auth/binding/${source}`, method: 'get' });
 }
 
 // 解绑账号
 export function authUnlock(authId: string) {
-  return request({ url: '/auth/unlock/' + authId, method: 'delete' });
+  return request({ url: `/auth/unlock/${authId}`, method: 'delete' });
 }
 
 // 获取授权列表

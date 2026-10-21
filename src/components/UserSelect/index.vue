@@ -2,7 +2,7 @@
   <t-dialog
     v-model:visible="innerVisible"
     :cancel-btn="null"
-    :confirm-btn="{ content: multiple ? '确定（已选 ' + selectedRows.length + '）' : '确定' }"
+    :confirm-btn="{ content: multiple ? `确定（已选 ${selectedRows.length}）` : '确定' }"
     :header="title"
     :on-confirm="onConfirm"
     width="900px"
@@ -57,17 +57,15 @@
     </div>
   </t-dialog>
 </template>
-
 <script lang="ts" setup>
-import type { PrimaryTableCol, PageInfo, RowEventContext, TableRowData } from 'tdesign-vue-next';
-import { SearchIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import type { PageInfo, PrimaryTableCol, RowEventContext, TableRowData } from 'tdesign-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
-import type { UserQuery, UserVO } from '@/api/system/user/types';
 import { deptTreeSelect, listUser } from '@/api/system/user';
-import { useDict } from '@/utils/dict';
-
+import type { UserQuery, UserVO } from '@/api/system/user/types';
 import TreePanel from '@/components/TreePanel/index.vue';
+import { useDict } from '@/utils/dict';
 
 defineOptions({ name: 'UserSelect' });
 
@@ -211,7 +209,6 @@ const onConfirm = () => {
   innerVisible.value = false;
 };
 </script>
-
 <style lang="less" scoped>
 .user-select {
   display: flex;

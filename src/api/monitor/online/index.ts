@@ -16,7 +16,7 @@ export function list(query: OnlineQuery): AxiosPromise<PageResult<OnlineVO>> {
 // 强退用户
 export function forceLogout(tokenId: string) {
   return request({
-    url: '/monitor/online/' + tokenId,
+    url: `/monitor/online/${tokenId}`,
     method: 'delete',
   });
 }
@@ -32,7 +32,7 @@ export function getOnline() {
 // 删除当前在线设备
 export function delOnline(tokenId: string) {
   return request({
-    url: '/monitor/online/myself/' + tokenId,
+    url: `/monitor/online/myself/${tokenId}`,
     method: 'delete',
   });
 }

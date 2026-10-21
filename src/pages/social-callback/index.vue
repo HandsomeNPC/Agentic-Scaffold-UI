@@ -3,14 +3,13 @@
     <t-loading v-if="loading" size="large" text="正在处理第三方登录..." />
   </div>
 </template>
-
 <script lang="ts" setup>
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import type { LoginData } from '@/api/types';
 import { callback, login } from '@/api/login';
+import type { LoginData } from '@/api/types';
 import { useUserStore } from '@/store';
 import { getToken, setToken } from '@/utils/auth';
 
@@ -26,7 +25,7 @@ const source = route.query.source as string;
 
 const goHome = () => {
   setTimeout(() => {
-    location.href = (import.meta.env.VITE_APP_CONTEXT_PATH || '/') + 'index';
+    location.href = `${import.meta.env.VITE_APP_CONTEXT_PATH || '/'}index`;
   }, 1500);
 };
 
@@ -73,7 +72,6 @@ const init = async () => {
 
 onMounted(init);
 </script>
-
 <style scoped>
 .social-callback {
   display: flex;

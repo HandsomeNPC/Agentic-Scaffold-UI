@@ -225,15 +225,17 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import type { RoleForm, RoleQuery, RoleVO } from '@/api/system/role/types';
+import { listDept } from '@/api/system/dept';
+import type { DeptVO } from '@/api/system/dept/types';
+import { roleMenuTreeselect, treeselect as menuTreeselect } from '@/api/system/menu';
+import type { MenuTreeOption } from '@/api/system/menu/types';
 import {
   addRole,
   changeRoleStatus,
@@ -243,15 +245,12 @@ import {
   updateRole,
   updateRolePermission,
 } from '@/api/system/role';
-import type { MenuTreeOption } from '@/api/system/menu/types';
-import { roleMenuTreeselect, treeselect as menuTreeselect } from '@/api/system/menu';
-import type { DeptVO } from '@/api/system/dept/types';
-import { listDept } from '@/api/system/dept';
-import { MenuTypeEnum } from '@/enums';
+import type { RoleForm, RoleQuery, RoleVO } from '@/api/system/role/types';
 import { isSuperAdminRole } from '@/constants';
-import { download } from '@/utils/request';
-import { useDict } from '@/utils/dict';
+import { MenuTypeEnum } from '@/enums';
 import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
+import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 import { handleTree, parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'SystemRole' });
@@ -672,7 +671,6 @@ const handleExport = () => download('/system/role/export', { ...queryParams }, `
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .role-page {
   padding: 16px;

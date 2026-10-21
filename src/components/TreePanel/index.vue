@@ -24,7 +24,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 
@@ -122,7 +121,6 @@ const foldAll = () => treeRef.value?.foldAll?.();
 
 defineExpose({ expandAll, foldAll });
 </script>
-
 <style lang="less" scoped>
 .tree-panel {
   display: flex;

@@ -16,7 +16,7 @@ export function list(query: OperLogQuery): AxiosPromise<PageResult<OperLogVO>> {
 // 删除操作日志
 export function delOperlog(operId: string | number | Array<string | number>) {
   return request({
-    url: '/monitor/operlog/' + operId,
+    url: `/monitor/operlog/${operId}`,
     method: 'delete',
   });
 }

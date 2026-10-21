@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import type { LoginData } from '@/api/types';
 import { getInfo as getInfoApi, login as loginApi, logout as logoutApi } from '@/api/login';
+import type { LoginData } from '@/api/types';
 import { getToken, removeToken, setToken } from '@/utils/auth';
 
 import { getPermissionStore } from './permission';

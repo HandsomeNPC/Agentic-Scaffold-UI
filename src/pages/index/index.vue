@@ -74,7 +74,6 @@
     </t-card>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { useUserStore } from '@/store';
 
@@ -124,7 +123,6 @@ const goTarget = (url: string) => {
   window.open(url, '_blank');
 };
 </script>
-
 <style lang="less" scoped>
 .home-page {
   display: flex;

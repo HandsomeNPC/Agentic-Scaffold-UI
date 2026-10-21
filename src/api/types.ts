@@ -1,14 +1,14 @@
 /**
  * 注册
  */
-export type RegisterForm = {
+export interface RegisterForm {
   username: string;
   password: string;
   confirmPassword?: string;
   code?: string;
   uuid?: string;
   userType?: string;
-};
+}
 
 /**
  * 登录请求

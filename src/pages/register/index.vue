@@ -61,7 +61,6 @@
     <footer class="copyright">Copyright © RuoYi-Vue-Plus TDesign</footer>
   </div>
 </template>
-
 <script lang="ts" setup>
 import type { FormInstanceFunctions, FormRule, SubmitContext } from 'tdesign-vue-next';
 import { DialogPlugin } from 'tdesign-vue-next';
@@ -146,7 +145,6 @@ const goLogin = () => {
   router.push('/login');
 };
 </script>
-
 <style lang="less" scoped>
 @import '../login/index.less';
 

@@ -110,15 +110,14 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { TreeForm, TreeQuery, TreeVO } from '@/api/demo/tree/types';
 import { addTree, delTree, getTree, listTree, updateTree } from '@/api/demo/tree';
+import type { TreeForm, TreeQuery, TreeVO } from '@/api/demo/tree/types';
 import { handleTree } from '@/utils/ruoyi';
 
 defineOptions({ name: 'DemoTree' });
@@ -251,7 +250,6 @@ const handleDelete = async (row: TreeVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .demo-tree-page {
   padding: 16px;

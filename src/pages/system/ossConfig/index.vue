@@ -156,14 +156,12 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { OssConfigForm, OssConfigQuery, OssConfigVO } from '@/api/system/ossConfig/types';
 import {
   addOssConfig,
   changeOssConfigStatus,
@@ -171,6 +169,7 @@ import {
   listOssConfig,
   updateOssConfig,
 } from '@/api/system/ossConfig';
+import type { OssConfigForm, OssConfigQuery, OssConfigVO } from '@/api/system/ossConfig/types';
 import { useDict } from '@/utils/dict';
 
 defineOptions({ name: 'SystemOssConfig' });
@@ -331,7 +330,6 @@ const handleDelete = async (row?: OssConfigVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .oss-config-page {
   padding: 16px;

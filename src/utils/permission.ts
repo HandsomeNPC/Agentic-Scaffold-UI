@@ -6,7 +6,7 @@ import { useUserStore } from '@/store/modules/user';
  * @returns 是否通过
  */
 export const checkPermi = (value: any): boolean => {
-  if (value && value instanceof Array && value.length > 0) {
+  if (value && Array.isArray(value) && value.length > 0) {
     const permissions = useUserStore().permissions;
     const all_permission = '*:*:*';
 
@@ -26,7 +26,7 @@ export const checkPermi = (value: any): boolean => {
  * @returns 是否通过
  */
 export const checkRole = (value: any): boolean => {
-  if (value && value instanceof Array && value.length > 0) {
+  if (value && Array.isArray(value) && value.length > 0) {
     const roles = useUserStore().roles;
     const super_admin = 'admin';
 

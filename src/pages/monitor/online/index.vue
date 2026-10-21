@@ -57,15 +57,14 @@
     </t-card>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { PoweroffIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { PoweroffIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { reactive, ref } from 'vue';
 
-import type { OnlineQuery, OnlineVO } from '@/api/monitor/online/types';
 import { forceLogout, list } from '@/api/monitor/online';
+import type { OnlineQuery, OnlineVO } from '@/api/monitor/online/types';
 import { useDict } from '@/utils/dict';
 import { parseTime } from '@/utils/ruoyi';
 
@@ -140,7 +139,6 @@ const handleForceLogout = async (row?: OnlineVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .online-page {
   padding: 16px;

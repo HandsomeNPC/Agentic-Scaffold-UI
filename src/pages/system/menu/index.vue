@@ -270,15 +270,14 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, HelpCircleIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, HelpCircleIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { MenuForm, MenuQuery, MenuTreeOption, MenuVO } from '@/api/system/menu/types';
 import { addMenu, cascadeDelMenu, delMenu, listMenu, treeselect, updateMenu } from '@/api/system/menu';
+import type { MenuForm, MenuQuery, MenuTreeOption, MenuVO } from '@/api/system/menu/types';
 import { useDict } from '@/utils/dict';
 import { handleTree, parseTime } from '@/utils/ruoyi';
 
@@ -497,7 +496,6 @@ const submitCascadeDelete = async () => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .menu-page {
   padding: 16px;

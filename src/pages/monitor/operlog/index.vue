@@ -151,18 +151,17 @@
     </t-drawer>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { DeleteIcon, DownloadIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { DeleteIcon, DownloadIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { OperLogQuery, OperLogVO } from '@/api/monitor/operlog/types';
 import { cleanOperlog, delOperlog, list } from '@/api/monitor/operlog';
+import type { OperLogQuery, OperLogVO } from '@/api/monitor/operlog/types';
 import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
-import { download } from '@/utils/request';
 import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'MonitorOperlog' });
@@ -305,7 +304,6 @@ const handleClean = async () => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .operlog-page {
   padding: 16px;

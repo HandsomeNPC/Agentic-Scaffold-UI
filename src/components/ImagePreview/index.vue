@@ -10,7 +10,6 @@
     </span>
   </span>
 </template>
-
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 
@@ -57,7 +56,6 @@ const wrapStyle = computed(() => ({
 
 const images = computed(() => (props.src ? [props.src] : []));
 </script>
-
 <style lang="less" scoped>
 .image-preview {
   display: inline-flex;

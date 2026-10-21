@@ -2,7 +2,7 @@
   <t-dialog
     v-model:visible="innerVisible"
     :cancel-btn="null"
-    :confirm-btn="{ content: multiple ? '确定（已选 ' + selectedRows.length + '）' : '确定' }"
+    :confirm-btn="{ content: multiple ? `确定（已选 ${selectedRows.length}）` : '确定' }"
     :header="title"
     :on-confirm="onConfirm"
     width="760px"
@@ -46,14 +46,13 @@
     </div>
   </t-dialog>
 </template>
-
 <script lang="ts" setup>
-import type { PrimaryTableCol, PageInfo, RowEventContext, TableRowData } from 'tdesign-vue-next';
-import { SearchIcon, RefreshIcon } from 'tdesign-icons-vue-next';
+import { RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
+import type { PageInfo, PrimaryTableCol, RowEventContext, TableRowData } from 'tdesign-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 
-import type { RoleQuery, RoleVO } from '@/api/system/role/types';
 import { listRole } from '@/api/system/role';
+import type { RoleQuery, RoleVO } from '@/api/system/role/types';
 import { useDict } from '@/utils/dict';
 
 defineOptions({ name: 'RoleSelect' });
@@ -177,7 +176,6 @@ const onConfirm = () => {
   innerVisible.value = false;
 };
 </script>
-
 <style lang="less" scoped>
 .role-select {
   display: flex;

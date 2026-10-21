@@ -23,7 +23,7 @@
             <li>
               <span class="info-label"><svg-icon icon-class="tree" />所属部门</span>
               <span class="info-value">
-                {{ profileUser.deptName ? `${profileUser.deptName}${postGroup ? ' / ' + postGroup : ''}` : '-' }}
+                {{ profileUser.deptName ? `${profileUser.deptName}${postGroup ? ` / ${postGroup}` : ''}` : '-' }}
               </span>
             </li>
             <li>
@@ -137,16 +137,16 @@
     </t-row>
   </div>
 </template>
-
 <script lang="ts" setup>
 import type { FormInstanceFunctions, FormRule } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref } from 'vue';
 
-import type { UserProfileForm, UserVO } from '@/api/system/user/types';
 import { getUserProfile, updateUserProfile, updateUserPwd } from '@/api/system/user';
+import type { UserProfileForm, UserVO } from '@/api/system/user/types';
 import { useUserStore } from '@/store';
 import { useDict } from '@/utils/dict';
+
 import UserAvatar from './userAvatar.vue';
 
 defineOptions({ name: 'UserProfile' });
@@ -265,9 +265,10 @@ const onAvatarUploaded = (url: string) => {
 
 // ---- 在线设备 ----
 import type { PrimaryTableCol } from 'tdesign-vue-next';
+
 import { delOnline, getOnline } from '@/api/monitor/online';
-import { authRouterUrl, authUnlock, getAuthList } from '@/api/system/social/auth';
 import type { OnlineVO } from '@/api/monitor/online/types';
+import { authRouterUrl, authUnlock, getAuthList } from '@/api/system/social/auth';
 import { parseTime } from '@/utils/ruoyi';
 
 const onlineDevices = ref<OnlineVO[]>([]);
@@ -335,7 +336,6 @@ loadProfile();
 loadOnline();
 loadSocial();
 </script>
-
 <style lang="less" scoped>
 .profile-page {
   padding: 16px;

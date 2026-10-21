@@ -11,7 +11,7 @@ export function listOss(query: OssQuery): AxiosPromise<PageResult<OssVO>> {
 
 // 查询 OSS 对象基于 id 串
 export function listByIds(ossId: string | number): AxiosPromise<OssVO[]> {
-  return request({ url: '/resource/oss/listByIds/' + ossId, method: 'get' });
+  return request({ url: `/resource/oss/listByIds/${ossId}`, method: 'get' });
 }
 
 // 上传 OSS 对象存储
@@ -21,5 +21,5 @@ export function uploadOss(data: FormData): AxiosPromise<OssUploadVO> {
 
 // 删除 OSS 对象存储
 export function delOss(ossId: string | number | Array<string | number>) {
-  return request({ url: '/resource/oss/' + ossId, method: 'delete' });
+  return request({ url: `/resource/oss/${ossId}`, method: 'delete' });
 }

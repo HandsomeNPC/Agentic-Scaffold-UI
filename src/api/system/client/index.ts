@@ -11,22 +11,22 @@ export const listClient = (query?: ClientQuery): AxiosPromise<PageResult<ClientV
 
 // 查询客户端详细
 export const getClient = (id: string | number): AxiosPromise<ClientVO> => {
-  return request({ url: '/system/client/' + id, method: 'get' });
+  return request({ url: `/system/client/${id}`, method: 'get' });
 };
 
 // 新增客户端
 export const addClient = (data: ClientForm) => {
-  return request({ url: '/system/client', method: 'post', data: data });
+  return request({ url: '/system/client', method: 'post', data });
 };
 
 // 修改客户端
 export const updateClient = (data: ClientForm) => {
-  return request({ url: '/system/client', method: 'put', data: data });
+  return request({ url: '/system/client', method: 'put', data });
 };
 
 // 删除客户端
 export const delClient = (id: string | number | Array<string | number>) => {
-  return request({ url: '/system/client/' + id, method: 'delete' });
+  return request({ url: `/system/client/${id}`, method: 'delete' });
 };
 
 // 状态修改

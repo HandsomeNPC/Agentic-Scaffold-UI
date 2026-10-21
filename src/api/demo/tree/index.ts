@@ -15,7 +15,7 @@ export function listTree(query?: TreeQuery): AxiosPromise<TreeVO[]> {
 // 查询测试树详细
 export function getTree(id: string | number): AxiosPromise<TreeVO> {
   return request({
-    url: '/demo/tree/' + id,
+    url: `/demo/tree/${id}`,
     method: 'get',
   });
 }
@@ -25,7 +25,7 @@ export function addTree(data: TreeForm) {
   return request({
     url: '/demo/tree',
     method: 'post',
-    data: data,
+    data,
   });
 }
 
@@ -34,14 +34,14 @@ export function updateTree(data: TreeForm) {
   return request({
     url: '/demo/tree',
     method: 'put',
-    data: data,
+    data,
   });
 }
 
 // 删除测试树
 export function delTree(id: string | number | Array<string | number>) {
   return request({
-    url: '/demo/tree/' + id,
+    url: `/demo/tree/${id}`,
     method: 'delete',
   });
 }

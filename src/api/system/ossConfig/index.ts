@@ -11,22 +11,22 @@ export function listOssConfig(query: OssConfigQuery): AxiosPromise<PageResult<Os
 
 // 查询对象存储配置详细
 export function getOssConfig(ossConfigId: string | number): AxiosPromise<OssConfigVO> {
-  return request({ url: '/resource/oss/config/' + ossConfigId, method: 'get' });
+  return request({ url: `/resource/oss/config/${ossConfigId}`, method: 'get' });
 }
 
 // 新增对象存储配置
 export function addOssConfig(data: OssConfigForm) {
-  return request({ url: '/resource/oss/config', method: 'post', data: data });
+  return request({ url: '/resource/oss/config', method: 'post', data });
 }
 
 // 修改对象存储配置
 export function updateOssConfig(data: OssConfigForm) {
-  return request({ url: '/resource/oss/config', method: 'put', data: data });
+  return request({ url: '/resource/oss/config', method: 'put', data });
 }
 
 // 删除对象存储配置
 export function delOssConfig(ossConfigId: string | number | Array<string | number>) {
-  return request({ url: '/resource/oss/config/' + ossConfigId, method: 'delete' });
+  return request({ url: `/resource/oss/config/${ossConfigId}`, method: 'delete' });
 }
 
 // 对象存储状态修改

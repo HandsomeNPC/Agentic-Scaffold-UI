@@ -1,6 +1,6 @@
+import type { UserQuery, UserVO } from '@/api/system/user/types';
 import type { PageResult } from '@/api/types';
 import type { AxiosPromise } from '@/utils/api-types';
-import type { UserQuery, UserVO } from '@/api/system/user/types';
 import request from '@/utils/request';
 
 import type { RoleDeptTree, RoleForm, RoleQuery, RoleVO } from './types';
@@ -17,7 +17,7 @@ export const listRole = (query: RoleQuery): AxiosPromise<PageResult<RoleVO>> => 
 // 通过 roleIds 查询角色
 export const optionSelect = (roleIds: Array<number | string>): AxiosPromise<RoleVO[]> => {
   return request({
-    url: '/system/role/optionselect?roleIds=' + roleIds,
+    url: `/system/role/optionselect?roleIds=${roleIds}`,
     method: 'get',
   });
 };
@@ -25,7 +25,7 @@ export const optionSelect = (roleIds: Array<number | string>): AxiosPromise<Role
 // 查询角色详细
 export const getRole = (roleId: string | number): AxiosPromise<RoleVO> => {
   return request({
-    url: '/system/role/' + roleId,
+    url: `/system/role/${roleId}`,
     method: 'get',
   });
 };
@@ -35,7 +35,7 @@ export const addRole = (data: RoleForm) => {
   return request({
     url: '/system/role',
     method: 'post',
-    data: data,
+    data,
   });
 };
 
@@ -44,7 +44,7 @@ export const updateRole = (data: RoleForm) => {
   return request({
     url: '/system/role',
     method: 'put',
-    data: data,
+    data,
   });
 };
 
@@ -60,7 +60,7 @@ export const updateRolePermission = (data: {
   return request({
     url: '/system/role/permission',
     method: 'put',
-    data: data,
+    data,
   });
 };
 
@@ -76,7 +76,7 @@ export const changeRoleStatus = (roleId: string | number, status: string) => {
 // 删除角色
 export const delRole = (roleId: Array<string | number> | string | number) => {
   return request({
-    url: '/system/role/' + roleId,
+    url: `/system/role/${roleId}`,
     method: 'delete',
   });
 };
@@ -84,7 +84,7 @@ export const delRole = (roleId: Array<string | number> | string | number) => {
 // 根据角色 ID 查询部门树结构
 export const deptTreeSelect = (roleId: string | number): AxiosPromise<RoleDeptTree> => {
   return request({
-    url: '/system/role/deptTree/' + roleId,
+    url: `/system/role/deptTree/${roleId}`,
     method: 'get',
   });
 };

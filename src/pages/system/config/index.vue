@@ -128,17 +128,16 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { ConfigForm, ConfigQuery, ConfigVO } from '@/api/system/config/types';
 import { addConfig, delConfig, listConfig, refreshCache, updateConfig, updateConfigByKey } from '@/api/system/config';
-import { download } from '@/utils/request';
+import type { ConfigForm, ConfigQuery, ConfigVO } from '@/api/system/config/types';
 import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'SystemConfig' });
@@ -297,7 +296,6 @@ const handleDelete = async (row?: ConfigVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .config-page {
   padding: 16px;

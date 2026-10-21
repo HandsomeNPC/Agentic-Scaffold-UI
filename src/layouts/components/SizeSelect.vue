@@ -17,7 +17,6 @@
     </template>
   </t-dropdown>
 </template>
-
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 
@@ -51,7 +50,6 @@ onMounted(() => {
   apply(saved && options.some((o) => o.value === saved) ? saved : 'medium');
 });
 </script>
-
 <style lang="less" scoped>
 .is-active {
   :deep(.t-dropdown__item-text) {

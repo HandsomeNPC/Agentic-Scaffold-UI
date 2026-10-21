@@ -3,7 +3,6 @@
     <use :fill="color" :xlink:href="iconName" />
   </svg>
 </template>
-
 <script lang="ts" setup>
 import { computed } from 'vue';
 
@@ -21,7 +20,6 @@ const iconStyle = computed(() => ({
   fontSize: props.size || undefined,
 }));
 </script>
-
 <style scoped>
 .svg-icon {
   width: 1em;

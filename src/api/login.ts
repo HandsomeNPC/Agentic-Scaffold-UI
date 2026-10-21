@@ -39,7 +39,7 @@ export function logout() {
     (import.meta.env.VITE_APP_MESSAGE_TRANSPORT || 'sse').toLowerCase() === 'sse'
   ) {
     request({
-      url: (import.meta.env.VITE_APP_MESSAGE_PATH || '/resource/message') + '/close',
+      url: `${import.meta.env.VITE_APP_MESSAGE_PATH || '/resource/message'}/close`,
       method: 'get',
     }).catch(() => {});
   }

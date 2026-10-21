@@ -30,13 +30,12 @@
     </t-row>
   </div>
 </template>
-
 <script lang="ts" setup>
 import * as echarts from 'echarts';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
-import type { CacheVO } from '@/api/monitor/cache/types';
 import { getCache } from '@/api/monitor/cache';
+import type { CacheVO } from '@/api/monitor/cache/types';
 
 defineOptions({ name: 'MonitorCache' });
 
@@ -103,7 +102,7 @@ const load = async () => {
     if (usedmemoryRef.value) {
       usedmemoryInstance = echarts.init(usedmemoryRef.value);
       usedmemoryInstance.setOption({
-        tooltip: { formatter: '{b} <br/>{a} : ' + (info.value.used_memory_human || '') },
+        tooltip: { formatter: `{b} <br/>{a} : ${info.value.used_memory_human || ''}` },
         series: [
           {
             name: '峰值',
@@ -130,7 +129,6 @@ onBeforeUnmount(() => {
   disposeCharts();
 });
 </script>
-
 <style lang="less" scoped>
 .cache-page {
   padding: 16px;

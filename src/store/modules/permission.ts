@@ -97,7 +97,7 @@ function processRoute(route: any, isTop: boolean) {
   // 顶层 path 补前导斜杠，便于 starter 侧边栏直接拼接；
   // 外链（http(s)://）path 不能补斜杠，否则变成 /https://...
   if (isTop && route.path && !String(route.path).startsWith('/') && !isHttp(String(route.path))) {
-    route.path = '/' + route.path;
+    route.path = `/${route.path}`;
   }
 
   if (route.children && route.children.length) {

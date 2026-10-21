@@ -132,15 +132,14 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { DemoForm, DemoQuery, DemoVO } from '@/api/demo/demo/types';
 import { addDemo, delDemo, getDemo, listDemo, updateDemo } from '@/api/demo/demo';
+import type { DemoForm, DemoQuery, DemoVO } from '@/api/demo/demo/types';
 import { download } from '@/utils/request';
 
 defineOptions({ name: 'DemoDemo' });
@@ -279,7 +278,6 @@ const handleDelete = async (row?: DemoVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .demo-demo-page {
   padding: 16px;

@@ -91,19 +91,17 @@
     </t-card>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { DeleteIcon, DownloadIcon, LockOffIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { DeleteIcon, DownloadIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
-import { LockOffIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { LoginInfoQuery, LoginInfoVO } from '@/api/monitor/loginInfo/types';
 import { cleanLoginInfo, delLoginInfo, list, unlockLoginInfo } from '@/api/monitor/loginInfo';
+import type { LoginInfoQuery, LoginInfoVO } from '@/api/monitor/loginInfo/types';
 import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
-import { download } from '@/utils/request';
 import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'MonitorLogininfo' });
@@ -222,7 +220,6 @@ const handleClean = async () => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .logininfo-page {
   padding: 16px;

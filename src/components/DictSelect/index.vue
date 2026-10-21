@@ -9,7 +9,6 @@
     @update:value="(v: any) => emit('update:modelValue', v)"
   />
 </template>
-
 <script lang="ts" setup>
 import { computed } from 'vue';
 

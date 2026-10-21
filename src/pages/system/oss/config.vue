@@ -1,7 +1,6 @@
 <template>
-  <OssConfigPage />
+  <oss-config-page />
 </template>
-
 <script lang="ts" setup>
 /**
  * 后端菜单 component 为 `system/oss/config`，而页面实现在 `pages/system/ossConfig/index.vue`。

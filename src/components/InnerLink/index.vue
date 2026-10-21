@@ -4,7 +4,6 @@
     <t-empty v-else description="未配置外链地址" />
   </div>
 </template>
-
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
@@ -14,7 +13,6 @@ defineOptions({ name: 'InnerLink' });
 const route = useRoute();
 const src = computed(() => (route.meta.link as string) || (route.meta.frameSrc as string) || '');
 </script>
-
 <style lang="less" scoped>
 .inner-link-wrap {
   width: 100%;

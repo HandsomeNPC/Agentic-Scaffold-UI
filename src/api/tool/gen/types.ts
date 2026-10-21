@@ -51,10 +51,10 @@ export interface DbColumnVO {
   sort?: number;
 }
 
-export type GenTableDetailPayload = {
+export interface GenTableDetailPayload {
   table: any;
   rows: DbColumnVO[];
-};
+}
 
 /** 代码生成表配置表单（编辑配置用，核心流程暂不使用完整字段） */
 export interface DbTableForm {

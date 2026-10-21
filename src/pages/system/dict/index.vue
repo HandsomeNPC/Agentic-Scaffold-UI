@@ -220,17 +220,16 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { DictDataForm, DictDataVO } from '@/api/system/dict/data/types';
 import { addData, delData, listData, updateData } from '@/api/system/dict/data';
-import type { DictTypeForm, DictTypeQuery, DictTypeVO } from '@/api/system/dict/type/types';
+import type { DictDataForm, DictDataVO } from '@/api/system/dict/data/types';
 import { addType, delType, listType, refreshCache, updateType } from '@/api/system/dict/type';
+import type { DictTypeForm, DictTypeQuery, DictTypeVO } from '@/api/system/dict/type/types';
 import { useDictStore } from '@/store/modules/dict';
 import { download } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
@@ -395,7 +394,7 @@ const handleTypeDelete = async (row?: DictTypeVO) => {
 };
 
 const handleTypeExport = () => {
-  download('/system/dict/type/export', { ...typeQueryParams }, `dict_type_${new Date().getTime()}.xlsx`);
+  download('/system/dict/type/export', { ...typeQueryParams }, `dict_type_${Date.now()}.xlsx`);
 };
 
 const handleRefreshCache = async () => {
@@ -582,14 +581,13 @@ const handleDataExport = () => {
   download(
     '/system/dict/data/export',
     { ...dataQueryParams, dictType: currentType.value.dictType },
-    `dict_data_${new Date().getTime()}.xlsx`,
+    `dict_data_${Date.now()}.xlsx`,
   );
 };
 
 // 初始化
 getTypeList();
 </script>
-
 <style lang="less" scoped>
 .dict-page {
   padding: 16px;

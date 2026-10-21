@@ -6,7 +6,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { computed } from 'vue';
 
@@ -14,7 +13,6 @@ defineOptions({ name: 'MonitorSnailai' });
 
 const src = computed(() => import.meta.env.VITE_APP_SNAILAI_ADMIN || '');
 </script>
-
 <style lang="less" scoped>
 .iframe-page {
   padding: 16px;

@@ -20,7 +20,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import type { RequestMethodResponse, UploadFile } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -138,7 +137,6 @@ watch(fileList, (arr) => {
   }
 });
 </script>
-
 <style scoped>
 .image-upload :deep(.t-upload__card) {
   width: auto;

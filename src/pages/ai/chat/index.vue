@@ -15,7 +15,6 @@
     </t-empty>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 
@@ -59,7 +58,6 @@ async function loadChat() {
 
 onMounted(loadChat);
 </script>
-
 <style lang="less" scoped>
 .ai-chat-page {
   height: calc(100vh - 123px);

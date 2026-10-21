@@ -15,7 +15,7 @@ export const listMenu = (query?: MenuQuery): AxiosPromise<MenuVO[]> => {
 // 查询菜单详细
 export const getMenu = (menuId: string | number): AxiosPromise<MenuVO> => {
   return request({
-    url: '/system/menu/' + menuId,
+    url: `/system/menu/${menuId}`,
     method: 'get',
   });
 };
@@ -31,7 +31,7 @@ export const treeselect = (): AxiosPromise<MenuTreeOption[]> => {
 // 根据角色 ID 查询菜单下拉树结构
 export const roleMenuTreeselect = (roleId: string | number): AxiosPromise<RoleMenuTree> => {
   return request({
-    url: '/system/menu/roleMenuTreeselect/' + roleId,
+    url: `/system/menu/roleMenuTreeselect/${roleId}`,
     method: 'get',
   });
 };
@@ -41,7 +41,7 @@ export const addMenu = (data: MenuForm) => {
   return request({
     url: '/system/menu',
     method: 'post',
-    data: data,
+    data,
   });
 };
 
@@ -50,14 +50,14 @@ export const updateMenu = (data: MenuForm) => {
   return request({
     url: '/system/menu',
     method: 'put',
-    data: data,
+    data,
   });
 };
 
 // 删除菜单
 export const delMenu = (menuId: string | number) => {
   return request({
-    url: '/system/menu/' + menuId,
+    url: `/system/menu/${menuId}`,
     method: 'delete',
   });
 };
@@ -65,7 +65,7 @@ export const delMenu = (menuId: string | number) => {
 // 级联删除菜单
 export const cascadeDelMenu = (menuIds: Array<string | number>) => {
   return request({
-    url: '/system/menu/cascade/' + menuIds,
+    url: `/system/menu/cascade/${menuIds}`,
     method: 'delete',
   });
 };

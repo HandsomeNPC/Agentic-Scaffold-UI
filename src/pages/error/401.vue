@@ -11,7 +11,6 @@
     </div>
   </div>
 </template>
-
 <script lang="ts" setup>
 import { useRouter } from 'vue-router';
 
@@ -21,7 +20,6 @@ const router = useRouter();
 const goHome = () => router.push('/');
 const goBack = () => router.go(-1);
 </script>
-
 <style lang="less" scoped>
 .page-401 {
   display: flex;

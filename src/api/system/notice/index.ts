@@ -16,7 +16,7 @@ export function listNotice(query: NoticeQuery): AxiosPromise<PageResult<NoticeVO
 // 查询公告详细
 export function getNotice(noticeId: string | number): AxiosPromise<NoticeVO> {
   return request({
-    url: '/system/notice/' + noticeId,
+    url: `/system/notice/${noticeId}`,
     method: 'get',
   });
 }
@@ -26,7 +26,7 @@ export function addNotice(data: NoticeForm) {
   return request({
     url: '/system/notice',
     method: 'post',
-    data: data,
+    data,
   });
 }
 
@@ -35,14 +35,14 @@ export function updateNotice(data: NoticeForm) {
   return request({
     url: '/system/notice',
     method: 'put',
-    data: data,
+    data,
   });
 }
 
 // 删除公告
 export function delNotice(noticeId: string | number | Array<string | number>) {
   return request({
-    url: '/system/notice/' + noticeId,
+    url: `/system/notice/${noticeId}`,
     method: 'delete',
   });
 }

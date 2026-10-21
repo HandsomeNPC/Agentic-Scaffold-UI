@@ -16,7 +16,7 @@ export function list(query: LoginInfoQuery): AxiosPromise<PageResult<LoginInfoVO
 // 删除登录日志
 export function delLoginInfo(infoId: string | number | Array<string | number>) {
   return request({
-    url: '/monitor/loginInfo/' + infoId,
+    url: `/monitor/loginInfo/${infoId}`,
     method: 'delete',
   });
 }
@@ -24,7 +24,7 @@ export function delLoginInfo(infoId: string | number | Array<string | number>) {
 // 解锁用户登录状态
 export function unlockLoginInfo(userName: string | Array<string>) {
   return request({
-    url: '/monitor/loginInfo/unlock/' + userName,
+    url: `/monitor/loginInfo/unlock/${userName}`,
     method: 'get',
   });
 }

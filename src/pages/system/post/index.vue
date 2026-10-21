@@ -169,17 +169,16 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, nextTick, reactive, ref } from 'vue';
 
-import type { PostForm, PostQuery, PostVO } from '@/api/system/post/types';
 import { addPost, delPost, deptTreeSelect, listPost, updatePost } from '@/api/system/post';
-import { download } from '@/utils/request';
+import type { PostForm, PostQuery, PostVO } from '@/api/system/post/types';
 import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'SystemPost' });
@@ -382,7 +381,6 @@ const handleDelete = async (row?: PostVO) => {
 loadDeptOptions();
 getList();
 </script>
-
 <style lang="less" scoped>
 .post-page {
   padding: 16px;

@@ -152,15 +152,14 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { DeptForm, DeptQuery, DeptVO } from '@/api/system/dept/types';
 import { addDept, delDept, listDept, listDeptExcludeChild, updateDept } from '@/api/system/dept';
+import type { DeptForm, DeptQuery, DeptVO } from '@/api/system/dept/types';
 import { listUserByDeptId } from '@/api/system/user';
 import { useDict } from '@/utils/dict';
 import { handleTree, parseTime } from '@/utils/ruoyi';
@@ -349,7 +348,6 @@ const handleDelete = async (row: DeptVO) => {
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .dept-page {
   padding: 16px;

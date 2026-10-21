@@ -6,9 +6,9 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import router from '@/router';
 import { getPermissionStore, useUserStore } from '@/store';
 import { getToken } from '@/utils/auth';
+import { closePush, initMessageBox, initPush } from '@/utils/push';
 import { isHandledRequestError, isRelogin } from '@/utils/request';
 import { filterExternalRoutes } from '@/utils/ruoyi';
-import { closePush, initMessageBox, initPush } from '@/utils/push';
 
 NProgress.configure({ showSpinner: false });
 

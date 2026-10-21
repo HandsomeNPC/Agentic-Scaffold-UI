@@ -17,7 +17,7 @@ export const listDept = (query?: DeptQuery): AxiosPromise<DeptVO[]> => {
  */
 export const optionSelect = (deptIds: Array<number | string>): AxiosPromise<DeptVO[]> => {
   return request({
-    url: '/system/dept/optionselect?deptIds=' + deptIds,
+    url: `/system/dept/optionselect?deptIds=${deptIds}`,
     method: 'get',
   });
 };
@@ -25,7 +25,7 @@ export const optionSelect = (deptIds: Array<number | string>): AxiosPromise<Dept
 // 查询部门列表（排除节点）
 export const listDeptExcludeChild = (deptId: string | number): AxiosPromise<DeptVO[]> => {
   return request({
-    url: '/system/dept/list/exclude/' + deptId,
+    url: `/system/dept/list/exclude/${deptId}`,
     method: 'get',
   });
 };
@@ -33,7 +33,7 @@ export const listDeptExcludeChild = (deptId: string | number): AxiosPromise<Dept
 // 查询部门详细
 export const getDept = (deptId: string | number): AxiosPromise<DeptVO> => {
   return request({
-    url: '/system/dept/' + deptId,
+    url: `/system/dept/${deptId}`,
     method: 'get',
   });
 };
@@ -43,7 +43,7 @@ export const addDept = (data: DeptForm) => {
   return request({
     url: '/system/dept',
     method: 'post',
-    data: data,
+    data,
   });
 };
 
@@ -52,14 +52,14 @@ export const updateDept = (data: DeptForm) => {
   return request({
     url: '/system/dept',
     method: 'put',
-    data: data,
+    data,
   });
 };
 
 // 删除部门
 export const delDept = (deptId: number | string) => {
   return request({
-    url: '/system/dept/' + deptId,
+    url: `/system/dept/${deptId}`,
     method: 'delete',
   });
 };

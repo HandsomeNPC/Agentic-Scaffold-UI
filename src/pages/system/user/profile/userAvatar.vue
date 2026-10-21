@@ -70,13 +70,13 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
-import { reactive, ref } from 'vue';
-import { VueCropper } from 'vue-cropper';
 import 'vue-cropper/dist/index.css';
+
 import { AddIcon, MinusIcon, RotateIcon, UploadIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
+import { reactive, ref } from 'vue';
+import { VueCropper } from 'vue-cropper';
 
 import { uploadOss } from '@/api/system/oss';
 import { updateUserProfile } from '@/api/system/user';
@@ -126,7 +126,7 @@ const onFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
   if (!file) return;
-  if (file.type.indexOf('image') === -1) {
+  if (!file.type.includes('image')) {
     MessagePlugin.warning('请选择图片文件');
     return;
   }
@@ -173,7 +173,6 @@ const upload = () => {
   });
 };
 </script>
-
 <style lang="less" scoped>
 .avatar-wrap {
   position: relative;

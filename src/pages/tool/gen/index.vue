@@ -79,7 +79,7 @@
         <template #createTime="{ row }">{{ parseTime(row.createTime) }}</template>
         <template #updateTime="{ row }">{{ parseTime(row.updateTime) }}</template>
         <template #operation="{ row }">
-          <t-space :breakLine="false" size="small">
+          <t-space :break-line="false" size="small">
             <t-link v-hasPermi="['tool:gen:preview']" hover="color" theme="primary" @click="handlePreview(row)"
               >预览</t-link
             >
@@ -364,10 +364,8 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
-import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
+import { useClipboard } from '@vueuse/core';
 import {
   DeleteIcon,
   DownloadIcon,
@@ -377,11 +375,13 @@ import {
   SearchIcon,
   UploadIcon,
 } from 'tdesign-icons-vue-next';
-import { useClipboard } from '@vueuse/core';
+import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import type { DbTableVO, PreviewResult, TableQuery, TableVO } from '@/api/tool/gen/types';
+import { optionselect as getDictOptionselect } from '@/api/system/dict/type';
+import { treeselect as menuTreeselect } from '@/api/system/menu';
 import {
   delTable,
   getDataNames,
@@ -393,8 +393,7 @@ import {
   synchDb,
   updateGenTable,
 } from '@/api/tool/gen';
-import { optionselect as getDictOptionselect } from '@/api/system/dict/type';
-import { treeselect as menuTreeselect } from '@/api/system/menu';
+import type { DbTableVO, PreviewResult, TableQuery, TableVO } from '@/api/tool/gen/types';
 import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
 import { downloadZip } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
@@ -604,7 +603,7 @@ const normalizeColumnDictType = (column: any) => {
 // 列字段下拉选项（用于状态/排序/唯一/树字段选择）
 const columnOptions = computed(() =>
   editColumns.value.map((c: any) => ({
-    label: `${c.columnName}${c.columnComment ? ': ' + c.columnComment : ''}`,
+    label: `${c.columnName}${c.columnComment ? `: ${c.columnComment}` : ''}`,
     value: c.columnName,
   })),
 );
@@ -612,7 +611,7 @@ const sortableColumnOptions = computed(() =>
   editColumns.value
     .filter((c: any) => ['Integer', 'Long', 'Double', 'BigDecimal', 'LocalDateTime'].includes(c.javaType ?? ''))
     .map((c: any) => ({
-      label: `${c.columnName}${c.columnComment ? ': ' + c.columnComment : ''}`,
+      label: `${c.columnName}${c.columnComment ? `: ${c.columnComment}` : ''}`,
       value: c.columnName,
     })),
 );
@@ -799,7 +798,6 @@ const handleSaveConfig = async () => {
 loadDataNames();
 getList();
 </script>
-
 <style lang="less" scoped>
 .gen-page {
   padding: 16px;

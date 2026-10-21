@@ -1,9 +1,9 @@
 // axios 配置  可自行根据项目进行更改，只需更改该文件即可，其他文件可以不动
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import { DialogPlugin, LoadingPlugin, MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
 import isString from 'lodash/isString';
 import merge from 'lodash/merge';
+import { DialogPlugin, LoadingPlugin, MessagePlugin, NotifyPlugin } from 'tdesign-vue-next';
 
 import { ContentTypeEnum } from '@/constants';
 import { HttpStatus } from '@/enums';
@@ -12,13 +12,14 @@ import cache from '@/plugins/cache';
 import router from '@/router';
 import { useUserStore } from '@/store';
 import { getToken } from '@/utils/auth';
-import { generateAesKey, decryptBase64, decryptWithAes, encryptBase64, encryptWithAes } from '@/utils/crypto';
+import { decryptBase64, decryptWithAes, encryptBase64, encryptWithAes, generateAesKey } from '@/utils/crypto';
 import { errorCode } from '@/utils/errorCode';
 import { decrypt, encrypt } from '@/utils/jsencrypt';
 import { blobValidate, tansParams } from '@/utils/ruoyi';
 import { saveBlob } from '@/utils/save';
-import type { AxiosTransform, CreateAxiosOptions } from './AxiosTransform';
+
 import { VAxios } from './Axios';
+import type { AxiosTransform, CreateAxiosOptions } from './AxiosTransform';
 import { formatRequestDate, joinTimestamp, setObjToUrlParams } from './utils';
 
 // =====================================================================
@@ -89,7 +90,7 @@ async function parseResponseErrorData(data: unknown): Promise<string | undefined
 
   if (typeof data === 'object') {
     const payload = data as Record<string, any>;
-    return payload.msg || payload.message || errorCode[payload.code] || errorCode['default'];
+    return payload.msg || payload.message || errorCode[payload.code] || errorCode.default;
   }
 
   return undefined;
@@ -105,14 +106,14 @@ export async function extractErrorMessage(error: any): Promise<string | undefine
 
 export const globalHeaders = () => {
   return {
-    Authorization: 'Bearer ' + getToken(),
+    Authorization: `Bearer ${getToken()}`,
     clientid: import.meta.env.VITE_APP_CLIENT_ID,
   };
 };
 
 // 默认请求头
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8';
-axios.defaults.headers['clientid'] = import.meta.env.VITE_APP_CLIENT_ID;
+axios.defaults.headers.clientid = import.meta.env.VITE_APP_CLIENT_ID;
 
 // 创建 axios 实例
 const service = axios.create({
@@ -138,11 +139,11 @@ service.interceptors.request.use(
 
     if (getToken() && !isToken) {
       // 让每个请求携带自定义 token 请根据实际情况自行修改
-      config.headers['Authorization'] = 'Bearer ' + getToken();
+      config.headers.Authorization = `Bearer ${getToken()}`;
     }
     // get 请求映射 params 参数
     if (config.method === 'get' && config.params) {
-      let url = config.url + '?' + tansParams(config.params);
+      let url = `${config.url}?${tansParams(config.params)}`;
       url = url.slice(0, -1);
       config.params = {};
       config.url = url;
@@ -164,7 +165,7 @@ service.interceptors.request.use(
         const interval = 500; // 间隔时间(ms)，小于此时间视为重复提交
         if (s_data === requestObj.data && requestObj.time - s_time < interval && s_url === requestObj.url) {
           const message = '数据正在处理，请勿重复提交';
-          console.warn(`[${s_url}]: ` + message);
+          console.warn(`[${s_url}]: ${message}`);
           return Promise.reject(new Error(message));
         } else {
           cache.session.setJSON('sessionObj', requestObj);
@@ -216,7 +217,7 @@ service.interceptors.response.use(
     // 未设置状态码则默认成功状态
     const code = res.data.code || HttpStatus.SUCCESS;
     // 获取错误信息
-    const msg = res.data.msg || errorCode[code] || errorCode['default'];
+    const msg = res.data.msg || errorCode[code] || errorCode.default;
     // 二进制数据则直接返回
     if (res.request.responseType === 'blob' || res.request.responseType === 'arraybuffer') {
       return res.data;
@@ -265,7 +266,7 @@ service.interceptors.response.use(
     }
   },
   async (error: any) => {
-    const message = (await extractErrorMessage(error)) || errorCode['default'];
+    const message = (await extractErrorMessage(error)) || errorCode.default;
     MessagePlugin.error(message);
     error.isHandled = true;
     return Promise.reject(error);
@@ -295,7 +296,7 @@ export function download(url: string, params: any, fileName: string) {
         const blob = new Blob([resp]);
         const resText = await blob.text();
         const rspObj = JSON.parse(resText);
-        const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default'];
+        const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode.default;
         MessagePlugin.error(errMsg);
       }
       downloadLoadingInstance?.hide();
@@ -326,7 +327,7 @@ async function downloadGetBlob(url: string, resolveName: (headers: Record<string
       saveBlob(new Blob([res.data], type ? { type } : undefined), resolveName(res.headers));
     } else {
       const rspObj = JSON.parse(await (res.data as Blob).text());
-      MessagePlugin.error(errorCode[rspObj.code] || rspObj.msg || errorCode['default']);
+      MessagePlugin.error(errorCode[rspObj.code] || rspObj.msg || errorCode.default);
     }
   } catch (e) {
     console.error(e);

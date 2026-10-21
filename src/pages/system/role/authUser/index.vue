@@ -104,14 +104,12 @@
     </t-card>
   </div>
 </template>
-
 <script lang="ts" setup>
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { UserQuery, UserVO } from '@/api/system/user/types';
 import {
   allocatedUserList,
   authUserCancel,
@@ -120,6 +118,7 @@ import {
   getRole,
   unallocatedUserList,
 } from '@/api/system/role';
+import type { UserQuery, UserVO } from '@/api/system/user/types';
 import { getTabsRouterStore } from '@/store/modules/tabs-router';
 import { useDict } from '@/utils/dict';
 
@@ -245,7 +244,6 @@ loadRole();
 loadAlloc();
 loadUnalloc();
 </script>
-
 <style lang="less" scoped>
 .auth-user-page {
   padding: 16px;

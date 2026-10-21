@@ -153,17 +153,16 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, DownloadIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref } from 'vue';
 
-import type { ClientForm, ClientQuery, ClientVO } from '@/api/system/client/types';
 import { addClient, changeStatus, delClient, listClient, updateClient } from '@/api/system/client';
-import { download } from '@/utils/request';
+import type { ClientForm, ClientQuery, ClientVO } from '@/api/system/client/types';
 import { useDict } from '@/utils/dict';
+import { download } from '@/utils/request';
 
 defineOptions({ name: 'SystemClient' });
 
@@ -339,7 +338,6 @@ const handleExport = () => download('/system/client/export', { ...queryParams },
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .client-page {
   padding: 16px;

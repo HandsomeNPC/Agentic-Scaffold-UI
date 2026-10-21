@@ -40,8 +40,8 @@ import SvgIcon from '@/components/SvgIcon/index.vue';
 import type { LocalizedTitle } from '@/locales';
 import { useLocale } from '@/locales/useLocale';
 import { getActive } from '@/router';
-import { getNormalPath, isExternal } from '@/utils/ruoyi';
 import type { MenuRoute } from '@/types/interface';
+import { getNormalPath, isExternal } from '@/utils/ruoyi';
 
 type ListItemType = MenuRoute;
 

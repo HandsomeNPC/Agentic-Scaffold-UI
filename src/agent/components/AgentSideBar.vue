@@ -61,7 +61,6 @@ onBeforeUnmount(() => document.documentElement.style.removeProperty('--agent-sid
   width: var(--agent-sidebar-width, min(520px, 100vw));
   overflow: hidden;
   border-left: 1px solid var(--td-component-stroke);
-  box-shadow: var(--td-shadow-2);
 
   &-enter-active,
   &-leave-active {

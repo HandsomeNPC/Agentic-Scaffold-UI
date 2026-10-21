@@ -45,7 +45,7 @@
           >
         </t-upload>
         <t-upload
-          :accept="'image/*'"
+          accept="image/*"
           :multiple="true"
           :request-method="customUpload"
           :show-upload-progress="true"
@@ -129,10 +129,7 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
-import type { PageInfo, PrimaryTableCol, RequestMethodResponse, UploadFile } from 'tdesign-vue-next';
-import { MessagePlugin } from 'tdesign-vue-next';
 import {
   BrowseIcon,
   DeleteIcon,
@@ -142,15 +139,17 @@ import {
   SettingIcon,
   UploadIcon,
 } from 'tdesign-icons-vue-next';
+import type { PageInfo, PrimaryTableCol, RequestMethodResponse, UploadFile } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import type { OssQuery, OssVO } from '@/api/system/oss/types';
-import { delOss, listOss, uploadOss } from '@/api/system/oss';
 import { getConfigKey, updateConfigByKey } from '@/api/system/config';
+import { delOss, listOss, uploadOss } from '@/api/system/oss';
+import type { OssQuery, OssVO } from '@/api/system/oss/types';
 import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
-import { downloadOss } from '@/utils/request';
 import { getToken } from '@/utils/auth';
+import { downloadOss } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'SystemOss' });
@@ -330,7 +329,6 @@ void getToken;
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .oss-page {
   padding: 16px;

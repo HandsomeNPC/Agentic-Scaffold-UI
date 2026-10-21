@@ -37,10 +37,9 @@
     </t-space>
   </div>
 </template>
-
 <script lang="ts" setup>
-import type { PrimaryTableCol } from 'tdesign-vue-next';
 import { RefreshIcon, SearchIcon, SettingIcon } from 'tdesign-icons-vue-next';
+import type { PrimaryTableCol } from 'tdesign-vue-next';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import cache from '@/plugins/cache';
@@ -138,7 +137,6 @@ onMounted(() => {
   syncVisibleKeys();
 });
 </script>
-
 <style lang="less" scoped>
 .right-toolbar {
   display: inline-flex;
@@ -150,7 +148,6 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 </style>
-
 <style lang="less">
 // popup 内容需要用非 scoped 样式（t-popup 内容渲染在 body 下）
 .right-toolbar-col-popup .t-popup__content {

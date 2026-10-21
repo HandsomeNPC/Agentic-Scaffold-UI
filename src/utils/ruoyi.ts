@@ -8,13 +8,13 @@ export function parseTime(time: any, pattern?: string) {
   if (typeof time === 'object') {
     date = time;
   } else {
-    if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
+    if (typeof time === 'string' && /^\d+$/.test(time)) {
       time = parseInt(time);
     } else if (typeof time === 'string') {
       time = time
-        .replace(new RegExp(/-/gm), '/')
+        .replace(new RegExp(/-/g), '/')
         .replace('T', ' ')
-        .replace(new RegExp(/\.[\d]{3}/gm), '');
+        .replace(new RegExp(/\.\d{3}/g), '');
     }
     if (typeof time === 'number' && time.toString().length === 10) {
       time = time * 1000;
@@ -30,14 +30,14 @@ export function parseTime(time: any, pattern?: string) {
     s: date.getSeconds(),
     a: date.getDay(),
   };
-  return format.replace(/{(y|m|d|h|i|s|a)+}/g, (result: string, key: string) => {
+  return format.replace(/\{([ymdhisa])+\}/g, (result: string, key: string) => {
     let value = formatObj[key];
     // Note: getDay() returns 0 on Sunday
     if (key === 'a') {
       return ['日', '一', '二', '三', '四', '五', '六'][value];
     }
     if (result.length > 0 && value < 10) {
-      value = '0' + value;
+      value = `0${value}`;
     }
     return value || 0;
   });
@@ -55,11 +55,11 @@ export const addDateRange = (params: any, dateRange: any[], propName?: string) =
     typeof search.params === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
   dateRange = Array.isArray(dateRange) ? dateRange : [];
   if (typeof propName === 'undefined') {
-    search.params['beginTime'] = dateRange[0];
-    search.params['endTime'] = dateRange[1];
+    search.params.beginTime = dateRange[0];
+    search.params.endTime = dateRange[1];
   } else {
-    search.params['begin' + propName] = dateRange[0];
-    search.params['end' + propName] = dateRange[1];
+    search.params[`begin${propName}`] = dateRange[0];
+    search.params[`end${propName}`] = dateRange[1];
   }
   return search;
 };
@@ -71,7 +71,7 @@ export const selectDictLabel = (datas: any, value: number | string) => {
   }
   const actions: Array<string | number> = [];
   Object.keys(datas).some((key) => {
-    if (datas[key].value == '' + value) {
+    if (datas[key].value == `${value}`) {
       actions.push(datas[key].label);
       return true;
     }
@@ -96,7 +96,7 @@ export const selectDictLabels = (datas: any, value: any, separator: any) => {
   Object.keys(value.split(currentSeparator)).some((val) => {
     let match = false;
     Object.keys(datas).some((key) => {
-      if (datas[key].value == '' + temp[val]) {
+      if (datas[key].value == `${temp[val]}`) {
         actions.push(datas[key].label + currentSeparator);
         match = true;
       }
@@ -111,8 +111,8 @@ export const selectDictLabels = (datas: any, value: any, separator: any) => {
 // 字符串格式化(%s )
 export function sprintf(str: string) {
   if (arguments.length !== 0) {
-    let flag = true,
-      i = 1;
+    let flag = true;
+    let i = 1;
     str = str.replace(/%s/g, function () {
       const arg = arguments[i++];
       if (typeof arg === 'undefined') {
@@ -197,18 +197,18 @@ export const tansParams = (params: any) => {
   let result = '';
   for (const propName of Object.keys(params)) {
     const value = params[propName];
-    const part = encodeURIComponent(propName) + '=';
+    const part = `${encodeURIComponent(propName)}=`;
     if (value !== null && value !== '' && typeof value !== 'undefined') {
       if (typeof value === 'object') {
         for (const key of Object.keys(value)) {
           if (value[key] !== null && value[key] !== '' && typeof value[key] !== 'undefined') {
-            const params = propName + '[' + key + ']';
-            const subPart = encodeURIComponent(params) + '=';
-            result += subPart + encodeURIComponent(value[key]) + '&';
+            const params = `${propName}[${key}]`;
+            const subPart = `${encodeURIComponent(params)}=`;
+            result += `${subPart + encodeURIComponent(value[key])}&`;
           }
         }
       } else {
-        result += part + encodeURIComponent(value) + '&';
+        result += `${part + encodeURIComponent(value)}&`;
       }
     }
   }

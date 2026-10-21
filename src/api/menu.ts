@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
+
 import type { AxiosPromise } from '@/utils/api-types';
 import request from '@/utils/request';
 

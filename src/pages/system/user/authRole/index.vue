@@ -39,7 +39,6 @@
     </t-card>
   </div>
 </template>
-
 <script lang="ts" setup>
 import type { PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -126,7 +125,6 @@ const close = () => {
 
 load();
 </script>
-
 <style lang="less" scoped>
 .auth-role-page {
   padding: 16px;

@@ -29,7 +29,6 @@
     </t-input>
   </t-popup>
 </template>
-
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 
@@ -60,7 +59,6 @@ const pick = (name: string) => {
   visible.value = false;
 };
 </script>
-
 <style scoped>
 .icon-picker {
   width: 332px;

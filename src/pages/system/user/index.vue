@@ -136,7 +136,7 @@
               }}</t-link>
             </template>
             <template #operation="{ row }">
-              <t-space :breakLine="false" size="small">
+              <t-space :break-line="false" size="small">
                 <t-link v-hasPermi="['system:user:query']" hover="color" theme="primary" @click="handleView(row)"
                   >详细</t-link
                 >
@@ -306,10 +306,7 @@
     </t-drawer>
   </div>
 </template>
-
 <script lang="ts" setup>
-import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
-import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import {
   AddIcon,
   DeleteIcon,
@@ -320,10 +317,13 @@ import {
   SearchIcon,
   UploadIcon,
 } from 'tdesign-icons-vue-next';
+import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import { DialogPlugin, MessagePlugin } from 'tdesign-vue-next';
 import { computed, nextTick, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import type { UserForm, UserQuery, UserVO } from '@/api/system/user/types';
+import { getConfigKey } from '@/api/system/config';
+import { optionselect as postOptionSelect } from '@/api/system/post';
 import {
   addUser,
   changeUserStatus,
@@ -335,14 +335,13 @@ import {
   unlockUser,
   updateUser,
 } from '@/api/system/user';
-import { getConfigKey } from '@/api/system/config';
-import { optionselect as postOptionSelect } from '@/api/system/post';
+import type { UserForm, UserQuery, UserVO } from '@/api/system/user/types';
 import { isSuperAdmin } from '@/constants';
+import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
 import { getLanguage } from '@/lang';
 import { useUserStore } from '@/store';
-import { download, globalHeaders } from '@/utils/request';
 import { useDict } from '@/utils/dict';
-import { useDateRangeQuery } from '@/hooks/useDateRangeQuery';
+import { download, globalHeaders } from '@/utils/request';
 import { parseTime } from '@/utils/ruoyi';
 
 defineOptions({ name: 'SystemUser' });
@@ -500,7 +499,7 @@ const handleStatusChange = async (row: UserVO, v: any) => {
       try {
         await changeUserStatus(row.userId, status);
         row.status = status;
-        MessagePlugin.success(text + '成功');
+        MessagePlugin.success(`${text}成功`);
       } catch {
         // 失败回滚开关
         row.status = status === '0' ? '1' : '0';
@@ -771,7 +770,6 @@ loadDeptTree();
 loadInitPassword();
 getList();
 </script>
-
 <style lang="less" scoped>
 .user-page {
   padding: 16px;

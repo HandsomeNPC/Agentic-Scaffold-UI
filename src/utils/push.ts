@@ -2,10 +2,10 @@ import { useEventSource, useWebSocket } from '@vueuse/core';
 import { NotifyPlugin } from 'tdesign-vue-next';
 import { watch } from 'vue';
 
-import type { MessageVO } from '@/api/system/message/types';
 import { getMessageBox } from '@/api/system/message';
-import { useNoticeStore } from '@/store/modules/notice';
+import type { MessageVO } from '@/api/system/message/types';
 import { useUserStore } from '@/store';
+import { useNoticeStore } from '@/store/modules/notice';
 import { getToken } from '@/utils/auth';
 import { isMessageRead } from '@/utils/message-read';
 import { parsePushMessage, resolveNoticeGroup, resolveNoticeTitle, shouldAppendNotice } from '@/utils/push-message';

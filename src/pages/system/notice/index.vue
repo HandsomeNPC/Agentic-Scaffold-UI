@@ -134,16 +134,15 @@
     </t-dialog>
   </div>
 </template>
-
 <script lang="ts" setup>
+import { AddIcon, DeleteIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { AddIcon, DeleteIcon, EditIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { NoticeForm, NoticeQuery, NoticeVO } from '@/api/system/notice/types';
 import { addNotice, delNotice, getNotice, listNotice, updateNotice } from '@/api/system/notice';
+import type { NoticeForm, NoticeQuery, NoticeVO } from '@/api/system/notice/types';
 import { useDict } from '@/utils/dict';
 import { resolveOssContent } from '@/utils/ossContent';
 import { parseTime } from '@/utils/ruoyi';
@@ -322,7 +321,6 @@ watch(
 
 getList();
 </script>
-
 <style lang="less" scoped>
 .notice-page {
   padding: 16px;

@@ -1,12 +1,10 @@
 <template>
   <div />
 </template>
-
 <script lang="ts" setup>
+import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
-import { MessagePlugin } from 'tdesign-vue-next';
 
 const router = useRouter();
 
