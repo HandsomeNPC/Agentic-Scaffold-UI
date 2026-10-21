@@ -20,6 +20,7 @@
       </t-layout>
     </template>
     <setting-com />
+    <agent-float />
   </div>
 </template>
 <script setup lang="ts">
@@ -29,6 +30,7 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { AgentFloat } from '@/agent';
 import { prefix } from '@/config/global';
 import { useSettingStore, useTabsRouterStore } from '@/store';
 

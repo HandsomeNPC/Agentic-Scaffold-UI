@@ -22,6 +22,7 @@
     "test:coverage": "echo \"no test:coverage specified,work in process\""
   },
   "dependencies": {
+    "@tdesign-vue-next/chat": "^0.7.0",
     "@vueuse/core": "^14.3.0",
     "@wangeditor-next/editor": "^6.5.1",
     "@wangeditor-next/editor-for-vue": "^6.5.1",
