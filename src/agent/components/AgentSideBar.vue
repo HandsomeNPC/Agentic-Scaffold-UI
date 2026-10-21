@@ -19,10 +19,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 
 import { checkPermi } from '@/utils/permission';
 
-import { setupAgentTools } from '../tools';
 import AgentPanel from './AgentPanel.vue';
-
-setupAgentTools();
 
 /** 侧边栏宽度。打开时写到根元素的 --agent-sidebar-width，布局据此给页面让出右侧空间。 */
 const SIDEBAR_WIDTH = 'min(520px, 100vw)';

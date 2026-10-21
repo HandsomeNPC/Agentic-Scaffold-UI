@@ -10,15 +10,15 @@ import type { AbortVo, RenderVo, ThreadVo } from './types';
 export const listThreads = (pageNum = 1, pageSize = 50): AxiosPromise<PageResult<ThreadVo>> =>
   request({ url: '/ai/threads', method: 'get', params: { pageNum, pageSize } });
 
-/** 新建会话 */
-export const createThread = (data: { title?: string; agentType?: string }): AxiosPromise<ThreadVo> =>
-  request({ url: '/ai/threads', method: 'post', data });
+/** 创建会话。两个入参都可省略：agentType 留空由后端使用默认 Agent。 */
+export const createThread = (data?: { title?: string; agentType?: string }): AxiosPromise<ThreadVo> =>
+  request({ url: '/ai/threads', method: 'post', data: data ?? {} });
 
 /** 删除会话 */
 export const deleteThread = (threadId: string): AxiosPromise<void> =>
   request({ url: '/ai/threads/delete', method: 'post', data: { threadId } });
 
-/** 拉取会话历史，用于切换/刷新后回填 */
+/** 渲染会话历史（含待审批状态与运行状态） */
 export const renderThread = (threadId: string): AxiosPromise<RenderVo> =>
   request({ url: '/ai/threads/render', method: 'post', data: { threadId } });
 
@@ -28,3 +28,6 @@ export const renderThread = (threadId: string): AxiosPromise<RenderVo> =>
  */
 export const abortThread = (threadId: string): AxiosPromise<AbortVo> =>
   request({ url: '/ai/threads/abort', method: 'post', data: { threadId }, headers: { repeatSubmit: false } });
+
+/** 对话流地址。交给 ChatEngine 作为 SSE endpoint。 */
+export const CHAT_ENDPOINT = `${import.meta.env.VITE_APP_BASE_API}/ai/threads/chat`;

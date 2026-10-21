@@ -1,64 +1,38 @@
 <template>
   <div class="agent-panel">
-    <div class="agent-panel__header">
-      <t-select
-        :disabled="busy"
-        :options="threadOptions"
-        :value="currentThreadId"
-        class="agent-panel__thread"
-        placeholder="选择会话"
-        @change="onSwitch"
-      >
-        <template #option="{ option }">
-          <div class="agent-panel__option">
-            <span class="agent-panel__option-title">{{ option.label }}</span>
-            <t-popconfirm content="删除该会话及全部消息？" @confirm="removeThread(option.value)">
-              <delete-icon class="agent-panel__option-del" @click.stop />
-            </t-popconfirm>
-          </div>
-        </template>
-      </t-select>
-      <t-tooltip content="新对话">
-        <t-button :disabled="busy" shape="square" variant="text" @click="newThread">
-          <template #icon><chat-bubble-add-icon /></template>
-        </t-button>
-      </t-tooltip>
-      <t-tooltip content="关闭">
-        <t-button shape="square" variant="text" @click="emit('close')">
-          <template #icon><close-icon /></template>
-        </t-button>
-      </t-tooltip>
-    </div>
+    <agent-header
+      :active-thread-id="activeThreadId"
+      :disabled="busy"
+      :threads="threads"
+      @close="emit('close')"
+      @create="newThread"
+      @remove="removeThread"
+      @select="selectThread"
+    />
 
     <t-loading :loading="loadingHistory" class="agent-panel__body" size="small">
-      <t-chat-list ref="chatListRef" :clear-history="false" class="agent-panel__chat">
+      <t-chat-list ref="listRef" :clear-history="false" class="agent-panel__chat">
         <t-chat-message
-          v-for="msg in messages"
-          :key="msg.id"
-          :message="msg"
+          v-for="message in messages"
+          :key="message.id"
+          :message="message"
           allow-content-segment-custom
-          v-bind="messageProps[msg.role as keyof TdChatMessageConfig]"
+          v-bind="messageProps[message.role as keyof TdChatMessageConfig]"
         >
-          <!-- tool call 走具名插槽：`${内容type}-${下标}`，type 形如 toolcall-<工具名>-<调用ID> -->
-          <template v-for="slot in toolSlotsOf(msg)" :key="slot.name" #[slot.name]>
-            <tool-call-card
-              :interrupt-message="interrupts[slot.toolCall.toolCallId]?.message"
-              :respond="
-                interrupts[slot.toolCall.toolCallId]
-                  ? (ok: boolean, p?: unknown) => respond(slot.toolCall.toolCallId, ok, p)
-                  : undefined
-              "
-              :tool-call="slot.toolCall"
-            />
+          <!-- 工具调用内容 -->
+          <template v-for="(item, index) in message.content" :key="`content-${index}`" #[`${item.type}-${index}`]>
+            <div v-if="isToolCall(item)">
+              <tool-call-renderer :tool-call="item.data" @respond="handleToolCallRespond" />
+            </div>
           </template>
         </t-chat-message>
         <template #footer>
           <t-chat-sender
-            v-model="prompt"
+            v-model="inputValue"
             :loading="busy"
-            :textarea-props="{ placeholder: '问我任何问题，或让我帮你操作系统，如「打开用户管理」' }"
-            @send="onSend"
-            @stop="stop"
+            :textarea-props="{ placeholder: '说点什么，比如：我想买两杯芋泥波波' }"
+            @send="handleSend"
+            @stop="handleStop"
           />
         </template>
       </t-chat-list>
@@ -66,101 +40,199 @@
   </div>
 </template>
 <script lang="ts" setup>
-import type { ChatMessagesData, TdChatMessageConfig } from '@tdesign-vue-next/chat';
+import type {
+  AIMessageContent,
+  ChatRequestParams,
+  TdChatMessageConfig,
+  ToolCall,
+  ToolCallContent,
+} from '@tdesign-vue-next/chat';
 import {
+  AGUIAdapter,
   ChatList as TChatList,
   ChatMessage as TChatMessage,
   ChatSender as TChatSender,
+  isToolCallContent,
+  ToolCallRenderer,
+  useAgentToolcall,
   useChat,
 } from '@tdesign-vue-next/chat';
-import { ChatBubbleAddIcon, CloseIcon, DeleteIcon } from 'tdesign-icons-vue-next';
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { MessagePlugin } from 'tdesign-vue-next';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
-import type { ToolCallData } from '../tools';
-import { useAgentChat } from '../useAgentChat';
-import ToolCallCard from './ToolCallCard.vue';
+import { getToken } from '@/utils/auth';
+import { isHandledRequestError } from '@/utils/request';
+
+import { abortThread, CHAT_ENDPOINT, createThread, deleteThread, listThreads, renderThread } from '../api/thread';
+import type { ThreadVo } from '../api/types';
+import AgentHeader from './AgentHeader.vue';
+import { toolcallActions } from './tools/register';
 
 const emit = defineEmits<{ close: [] }>();
 
-const {
-  threads,
-  currentThreadId,
-  loadingHistory,
-  interrupts,
-  chatEngine: sharedEngine,
-  serviceConfig,
-  switchThread,
-  newThread,
-  removeThread,
-  ensureThread,
-  respond,
-  stop,
-} = useAgentChat();
+const threads = ref<ThreadVo[]>([]);
+const activeThreadId = ref('');
+const inputValue = ref('');
+const loadingHistory = ref(false);
 
-/** 引擎随面板挂载创建、卸载销毁；消息与状态由 useChat 订阅引擎同步成响应式数据 */
-const { chatEngine, messages, status } = useChat({ defaultMessages: [], chatServiceConfig: serviceConfig });
+useAgentToolcall(toolcallActions);
+
+const { chatEngine, messages, status } = useChat({
+  defaultMessages: [],
+  chatServiceConfig: {
+    endpoint: CHAT_ENDPOINT,
+    protocol: 'agui',
+    transport: 'sse',
+    // 对话走裸 fetch，不经 axios 拦截器，鉴权头要自己带。
+    onRequest: (params: ChatRequestParams) => ({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+        clientid: import.meta.env.VITE_APP_CLIENT_ID,
+      },
+      body: JSON.stringify({
+        ...params,
+        threadId: activeThreadId.value,
+      }),
+    }),
+
+    // 断开 SSE 不会让后端的 run 停下，必须显式调 /abort。
+    onAbort: async () => {
+      if (!activeThreadId.value) return;
+      try {
+        await abortThread(activeThreadId.value);
+      } catch (err) {
+        console.warn('[chat] 通知后端终止失败:', err);
+      }
+    },
+
+    onError: (err: Error | Response) => {
+      MessagePlugin.error(err instanceof Error ? err.message : `对话请求失败(${err.status})`);
+    },
+  },
+});
 
 /** ChatList 通过 expose 暴露了 scrollToBottom，但类型声明里没有 */
-const chatListRef = ref<{ scrollToBottom: (opts: { behavior: 'auto' | 'smooth' }) => void } | null>(null);
-const prompt = ref('');
+const listRef = ref<{ scrollToBottom: (opts: { behavior: 'auto' | 'smooth' }) => void } | null>(null);
 
 const busy = computed(() => status.value === 'pending' || status.value === 'streaming');
-
-const threadOptions = computed(() => threads.value.map((t) => ({ label: t.title || '未命名会话', value: t.threadId })));
 
 const messageProps: TdChatMessageConfig = {
   user: { variant: 'base', placement: 'right' },
   assistant: { variant: 'text', placement: 'left', chatContentProps: { markdown: {} } },
 };
 
-/** 单条消息里的 tool call 插槽，名字与 t-chat-item 内部的 `<slot name="${type}-${index}">` 对应 */
-function toolSlotsOf(msg: ChatMessagesData) {
-  const out: { name: string; toolCall: ToolCallData }[] = [];
-  if (msg.role !== 'assistant') return out;
-  (msg.content || []).forEach((c: any, idx: number) => {
-    if (typeof c?.type === 'string' && c.type.startsWith('toolcall-') && c.data?.toolCallId) {
-      out.push({ name: `${c.type}-${idx}`, toolCall: c.data as ToolCallData });
-    }
-  });
-  return out;
+/** 用户消息的内容类型不在 AIMessageContent 里，放宽后交给引擎判断 */
+function isToolCall(item: unknown): item is ToolCallContent {
+  return isToolCallContent(item as AIMessageContent);
+}
+
+/** axios 拦截器已提示过的错误不再重复弹 */
+function notifyError(err: unknown, fallback: string) {
+  if (isHandledRequestError(err)) return;
+  MessagePlugin.error(err instanceof Error && err.message ? err.message : fallback);
 }
 
 function scrollToBottom(behavior: 'auto' | 'smooth' = 'auto') {
-  nextTick(() => chatListRef.value?.scrollToBottom({ behavior }));
+  nextTick(() => listRef.value?.scrollToBottom({ behavior }));
 }
-
-async function onSend(value: string) {
-  const text = value.trim();
-  if (!text || busy.value || !chatEngine.value) return;
-  prompt.value = '';
-  // sendUserMessage 要等整轮流式结束才 resolve，先发起再滚动
-  const sending = chatEngine.value.sendUserMessage({ prompt: text });
-  scrollToBottom('smooth');
-  await sending;
-}
-
-async function onSwitch(value: unknown) {
-  await switchThread(String(value));
-}
-
-// 历史回填完成后滚到底
-watch(loadingHistory, (loading) => {
-  if (!loading) scrollToBottom();
-});
 
 /**
- * 引擎就绪后挂到全局会话状态上（切会话 / 审批 / 终止都经由它）。
- * 面板实例可能被重建（keep-alive 外的 v-if），会话已存在时把历史回填到新引擎；首次打开则进最近会话或新建。
+ * 工具卡片的 respond 回调。
  */
-watch(chatEngine, async (engine) => {
-  sharedEngine.value = engine;
-  if (!engine) return;
-  if (currentThreadId.value) await switchThread(currentThreadId.value);
-  else await ensureThread();
-});
+async function handleToolCallRespond(_toolcall: ToolCall, response: any) {
+  try {
+    await chatEngine.value?.resumeRun({ resume: response } as ChatRequestParams);
+  } catch (err) {
+    notifyError(err, '恢复执行失败');
+  }
+}
 
-onBeforeUnmount(() => {
-  if (sharedEngine.value === chatEngine.value) sharedEngine.value = null;
+async function refreshThreads() {
+  try {
+    const res = await listThreads();
+    threads.value = res.data?.rows ?? [];
+  } catch (err) {
+    notifyError(err, '加载会话列表失败');
+  }
+}
+
+/** 切换会话：用 /render 的历史替换消息列表。 */
+async function selectThread(threadId: string) {
+  if (!threadId) return;
+  activeThreadId.value = threadId;
+
+  loadingHistory.value = true;
+  try {
+    const res = await renderThread(threadId);
+    // 切会话期间用户可能又点了别的会话，过期响应直接丢掉。
+    if (activeThreadId.value !== threadId) return;
+    chatEngine.value?.setMessages(AGUIAdapter.convertHistoryMessages((res.data?.messages ?? []) as never), 'replace');
+    scrollToBottom();
+  } catch (err) {
+    if (activeThreadId.value === threadId) notifyError(err, '加载会话历史失败');
+  } finally {
+    if (activeThreadId.value === threadId) loadingHistory.value = false;
+  }
+}
+
+async function newThread() {
+  try {
+    const res = await createThread();
+    const info = res.data!;
+    threads.value = [info, ...threads.value];
+    chatEngine.value?.clearMessages();
+    await selectThread(info.threadId);
+  } catch (err) {
+    notifyError(err, '创建会话失败');
+  }
+}
+
+async function removeThread(threadId: string) {
+  try {
+    await deleteThread(threadId);
+    threads.value = threads.value.filter((t) => t.threadId !== threadId);
+    if (activeThreadId.value !== threadId) return;
+
+    activeThreadId.value = '';
+    chatEngine.value?.clearMessages();
+    const next = threads.value[0];
+    if (next) await selectThread(next.threadId);
+  } catch (err) {
+    notifyError(err, '删除会话失败');
+  }
+}
+
+async function handleSend(prompt: string) {
+  const text = prompt.trim();
+  if (!text) return;
+
+  if (!activeThreadId.value) {
+    await newThread();
+    if (!activeThreadId.value) return;
+  }
+
+  inputValue.value = '';
+  try {
+    // sendUserMessage 要等整轮流式结束才 resolve，先发起再滚动
+    const sending = chatEngine.value?.sendUserMessage({ prompt: text });
+    scrollToBottom('smooth');
+    await sending;
+  } catch (err) {
+    notifyError(err, '发送失败');
+  }
+}
+
+function handleStop() {
+  chatEngine.value?.abortChat();
+}
+
+onMounted(async () => {
+  await refreshThreads();
+  const first = threads.value[0];
+  if (first) await selectThread(first.threadId);
+  else await newThread();
 });
 </script>
 <style lang="less" scoped>
@@ -169,52 +241,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
   height: 100%;
   background: var(--td-bg-color-container);
-
-  &__header {
-    // 与系统顶部 Header 等高（--td-comp-size-xxxl，随 size 切换），图标随之放大。
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 8px;
-    height: var(--td-comp-size-xxxl);
-    padding: 0 12px 0 16px;
-    border-bottom: 1px solid var(--td-component-stroke);
-
-    // 按钮图标统一放大，对齐 Header 操作区观感
-    :deep(.t-button .td-icon),
-    :deep(.t-button svg) {
-      font-size: 22px;
-    }
-  }
-
-  &__thread {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    gap: 8px;
-  }
-
-  &__option-title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__option-del {
-    flex-shrink: 0;
-    font-size: 18px;
-    color: var(--td-text-color-placeholder);
-
-    &:hover {
-      color: var(--td-error-color);
-    }
-  }
 
   &__body {
     flex: 1;
