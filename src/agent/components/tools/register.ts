@@ -1,6 +1,9 @@
 import type { AgentToolcallConfig } from '@tdesign-vue-next/chat';
 
 import DemoToolCard from './demo/DemoToolCard.vue';
+import AssignUserRolesToolCard from './system/AssignUserRolesToolCard.vue';
+import ChangeUserStatusToolCard from './system/ChangeUserStatusToolCard.vue';
+import DraftNoticeToolCard from './system/DraftNoticeToolCard.vue';
 import GetCurrentUserToolCard from './system/GetCurrentUserToolCard.vue';
 import GetDeptTreeToolCard from './system/GetDeptTreeToolCard.vue';
 import GetMyMenusToolCard from './system/GetMyMenusToolCard.vue';
@@ -14,6 +17,9 @@ import ListRoleUsersToolCard from './system/ListRoleUsersToolCard.vue';
 import LookupDictToolCard from './system/LookupDictToolCard.vue';
 import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
 import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
+import SendMessageToolCard from './system/SendMessageToolCard.vue';
+import UnlockUserToolCard from './system/UnlockUserToolCard.vue';
+import UpdateMyProfileToolCard from './system/UpdateMyProfileToolCard.vue';
 
 /**
  * 注册工具渲染组件。name 与后端工具名一一对应。
@@ -147,5 +153,59 @@ export const toolcallActions: AgentToolcallConfig[] = [
       { name: 'pageSize', type: 'number', required: false },
     ],
     component: SearchNoticesToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'UpdateMyProfile',
+    description: '修改当前登录用户本人的昵称、邮箱、手机号，需要用户确认',
+    parameters: [
+      { name: 'nickName', type: 'string', required: false },
+      { name: 'email', type: 'string', required: false },
+      { name: 'phoneNumber', type: 'string', required: false },
+    ],
+    component: UpdateMyProfileToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'DraftNotice',
+    description: '起草并发布通知公告，需要用户审阅确认',
+    parameters: [
+      { name: 'noticeTitle', type: 'string', required: true },
+      { name: 'noticeType', type: 'string', required: true },
+      { name: 'noticeContent', type: 'string', required: true },
+      { name: 'status', type: 'string', required: false },
+    ],
+    component: DraftNoticeToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ChangeUserStatus',
+    description: '启用或停用系统用户，需要用户确认',
+    parameters: [
+      { name: 'userName', type: 'string', required: true },
+      { name: 'status', type: 'string', required: true },
+    ],
+    component: ChangeUserStatusToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'UnlockUser',
+    description: '解锁因密码输错被锁定的用户，需要用户确认',
+    parameters: [{ name: 'userName', type: 'string', required: true }],
+    component: UnlockUserToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'AssignUserRoles',
+    description: '给系统用户重新分配角色，需要用户确认',
+    parameters: [
+      { name: 'userName', type: 'string', required: true },
+      { name: 'roleKeys', type: 'array', required: true },
+    ],
+    component: AssignUserRolesToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'SendMessage',
+    description: '给指定用户发送站内信，需要用户确认',
+    parameters: [
+      { name: 'userNames', type: 'array', required: true },
+      { name: 'message', type: 'string', required: true },
+    ],
+    component: SendMessageToolCard as AgentToolcallConfig['component'],
   },
 ];
