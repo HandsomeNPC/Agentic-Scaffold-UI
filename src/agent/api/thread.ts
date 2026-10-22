@@ -35,3 +35,13 @@ export const abortThread = (threadId: string): AxiosPromise<AbortVo> =>
 
 /** 对话流地址。交给 ChatEngine 作为 SSE endpoint。 */
 export const CHAT_ENDPOINT = `${import.meta.env.VITE_APP_BASE_API}/ai/threads/chat`;
+
+/**
+ * 上传附件到 OSS。
+ * 走 multipart/form-data（axios 自动设置 Content-Type），不走 apiencrypt。
+ */
+export const uploadAttachment = (file: File): AxiosPromise<{ url: string; fileName: string; ossId: string }> => {
+  const form = new FormData();
+  form.append('file', file);
+  return request({ url: '/resource/oss/upload', method: 'post', data: form });
+};
