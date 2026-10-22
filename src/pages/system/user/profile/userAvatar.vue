@@ -14,7 +14,7 @@
       @opened="onOpened"
     >
       <t-row :gutter="16">
-        <t-col :span="14">
+        <t-col :span="7">
           <div class="cropper-box">
             <vue-cropper
               v-if="cropperVisible"
@@ -37,7 +37,7 @@
             />
           </div>
         </t-col>
-        <t-col :span="10">
+        <t-col :span="5">
           <div class="preview-box">
             <div class="preview-title">预览</div>
             <div :style="previews.div" class="preview-circle">
@@ -110,6 +110,8 @@ const options = reactive({
 const previews = reactive<{ url: string; img: any; div: any }>({ url: '', img: {}, div: {} });
 
 const open = () => {
+  // 不用当前头像 URL seed：私有桶预签名地址经 vue-cropper 的 crossOrigin 路径加载
+  // 可能失败，失败时 centerBox 会把裁剪框算成 0×0。打开即空画布，由用户选图。
   options.img = '';
   previews.url = '';
   visible.value = true;
@@ -154,8 +156,14 @@ const upload = () => {
     MessagePlugin.warning('请先选择图片');
     return;
   }
+  // 守卫 cropperRef：getCropBlob 的回调内才复位 uploading，ref 缺失时直接退出，
+  // 否则按钮会永久转圈、无法重试。
+  if (!cropperRef.value || typeof cropperRef.value.getCropBlob !== 'function') {
+    MessagePlugin.warning('裁剪器未就绪，请重新打开');
+    return;
+  }
   uploading.value = true;
-  cropperRef.value?.getCropBlob?.(async (blob: Blob) => {
+  cropperRef.value.getCropBlob(async (blob: Blob) => {
     const formData = new FormData();
     formData.append('file', blob, fileName.value || 'avatar.png');
     try {
@@ -214,14 +222,12 @@ const upload = () => {
   color: var(--td-text-color-secondary);
 }
 .preview-circle {
+  position: relative;
   width: 200px;
   height: 200px;
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid var(--td-component-stroke);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .preview-circle img {
   width: 100%;
