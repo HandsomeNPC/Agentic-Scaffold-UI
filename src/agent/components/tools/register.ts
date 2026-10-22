@@ -2,10 +2,18 @@ import type { AgentToolcallConfig } from '@tdesign-vue-next/chat';
 
 import DemoToolCard from './demo/DemoToolCard.vue';
 import GetCurrentUserToolCard from './system/GetCurrentUserToolCard.vue';
+import GetDeptTreeToolCard from './system/GetDeptTreeToolCard.vue';
 import GetMyMenusToolCard from './system/GetMyMenusToolCard.vue';
 import GetMyMessagesToolCard from './system/GetMyMessagesToolCard.vue';
 import GetMyPermissionsToolCard from './system/GetMyPermissionsToolCard.vue';
+import GetUserDetailToolCard from './system/GetUserDetailToolCard.vue';
+import ListDeptUsersToolCard from './system/ListDeptUsersToolCard.vue';
+import ListPostsToolCard from './system/ListPostsToolCard.vue';
+import ListRolesToolCard from './system/ListRolesToolCard.vue';
+import ListRoleUsersToolCard from './system/ListRoleUsersToolCard.vue';
 import LookupDictToolCard from './system/LookupDictToolCard.vue';
+import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
+import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
 
 /**
  * 注册工具渲染组件。name 与后端工具名一一对应。
@@ -57,5 +65,87 @@ export const toolcallActions: AgentToolcallConfig[] = [
       { name: 'value', type: 'string', required: false },
     ],
     component: LookupDictToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'SearchUsers',
+    description: '按账号、昵称、手机号、状态、部门分页查询系统用户',
+    parameters: [
+      { name: 'userName', type: 'string', required: false },
+      { name: 'nickName', type: 'string', required: false },
+      { name: 'phoneNumber', type: 'string', required: false },
+      { name: 'status', type: 'string', required: false },
+      { name: 'deptId', type: 'number', required: false },
+      { name: 'pageNum', type: 'number', required: false },
+      { name: 'pageSize', type: 'number', required: false },
+    ],
+    component: SearchUsersToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'GetUserDetail',
+    description: '按用户 ID 查询某个系统用户的详细信息',
+    parameters: [{ name: 'userId', type: 'number', required: true }],
+    component: GetUserDetailToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'GetDeptTree',
+    description: '查询组织架构（部门树）',
+    parameters: [
+      { name: 'deptName', type: 'string', required: false },
+      { name: 'status', type: 'string', required: false },
+    ],
+    component: GetDeptTreeToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ListDeptUsers',
+    description: '按部门 ID 查询该部门的直属成员',
+    parameters: [
+      { name: 'deptId', type: 'number', required: true },
+      { name: 'limit', type: 'number', required: false },
+    ],
+    component: ListDeptUsersToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ListRoles',
+    description: '查询系统角色列表',
+    parameters: [
+      { name: 'roleName', type: 'string', required: false },
+      { name: 'roleKey', type: 'string', required: false },
+      { name: 'status', type: 'string', required: false },
+    ],
+    component: ListRolesToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ListRoleUsers',
+    description: '按角色 ID 分页查询已分配该角色的用户',
+    parameters: [
+      { name: 'roleId', type: 'number', required: true },
+      { name: 'userName', type: 'string', required: false },
+      { name: 'pageNum', type: 'number', required: false },
+      { name: 'pageSize', type: 'number', required: false },
+    ],
+    component: ListRoleUsersToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ListPosts',
+    description: '查询系统岗位列表，可按部门过滤',
+    parameters: [
+      { name: 'postName', type: 'string', required: false },
+      { name: 'postCode', type: 'string', required: false },
+      { name: 'deptId', type: 'number', required: false },
+      { name: 'status', type: 'string', required: false },
+    ],
+    component: ListPostsToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'SearchNotices',
+    description: '按标题、类型、发布人分页查询通知公告（管理视角）',
+    parameters: [
+      { name: 'noticeTitle', type: 'string', required: false },
+      { name: 'noticeType', type: 'string', required: false },
+      { name: 'createByName', type: 'string', required: false },
+      { name: 'pageNum', type: 'number', required: false },
+      { name: 'pageSize', type: 'number', required: false },
+    ],
+    component: SearchNoticesToolCard as AgentToolcallConfig['component'],
   },
 ];
