@@ -27,20 +27,7 @@
           </template>
         </t-chat-message>
         <template #footer>
-          <t-chat-sender
-            v-model="inputValue"
-            :loading="busy"
-            :attachments-props="senderAttachmentsProps"
-            :textarea-props="{ placeholder: '说点什么，比如：我想买两杯芋泥波波' }"
-            @send="handleSend"
-            @stop="handleStop"
-            @remove="handleAttachmentRemove"
-            @file-select="handleFileSelect"
-          >
-            <template #suffix="{ renderPresets }">
-              <component :is="() => renderPresets(senderActions)" />
-            </template>
-          </t-chat-sender>
+          <agent-sender ref="senderRef" :loading="busy" @send="handleSend" @stop="handleStop" />
         </template>
       </t-chat-list>
     </t-loading>
@@ -50,16 +37,13 @@
 import type {
   AIMessageContent,
   ChatRequestParams,
-  TdAttachmentItem,
   TdChatMessageConfig,
   ToolCall,
   ToolCallContent,
-  UploadActionConfig,
 } from '@tdesign-vue-next/chat';
 import {
   ChatList as TChatList,
   ChatMessage as TChatMessage,
-  ChatSender as TChatSender,
   isToolCallContent,
   ToolCallRenderer,
   useAgentToolcall,
@@ -79,10 +63,11 @@ import {
   listThreads,
   loadMessages,
   saveMessages,
-  uploadAttachment,
 } from '../api/thread';
 import type { ThreadVo } from '../api/types';
 import AgentHeader from './AgentHeader.vue';
+import type { SendAttachment } from './AgentSender.vue';
+import AgentSender from './AgentSender.vue';
 import { toolcallActions } from './tools/register';
 
 const emit = defineEmits<{ close: [] }>();
@@ -92,8 +77,10 @@ const AGENT_TYPE = 'assistant';
 
 const threads = ref<ThreadVo[]>([]);
 const activeThreadId = ref('');
-const inputValue = ref('');
 const loadingHistory = ref(false);
+
+/** AgentSender 的实例引用，发送成功后调 clear() 清空输入框与附件。 */
+const senderRef = ref<{ clear: () => void } | null>(null);
 
 useAgentToolcall(toolcallActions);
 
@@ -137,115 +124,6 @@ const { chatEngine, messages, status } = useChat({
 const listRef = ref<{ scrollToBottom: (opts: { behavior: 'auto' | 'smooth' }) => void } | null>(null);
 
 const busy = computed(() => status.value === 'pending' || status.value === 'streaming');
-
-// ---------- 附件 ----------
-
-/**
- * 允许上传的 MIME 类型白名单。
- * 后端 OSS handler 按 10 MB 上限，此处做前置过滤，减少无效请求。
- */
-const ALLOWED_MIME = new Set([
-  // 图片
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  // 文档
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'text/plain',
-]);
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB，与后端 maxUploadSize 对齐
-
-/** 图片 picker 的 accept 列表，与 ALLOWED_MIME 里的图片子集对齐。 */
-const IMAGE_ACCEPT = 'image/jpeg,image/png,image/gif,image/webp';
-/** 文档 picker 的 accept 列表，与 ALLOWED_MIME 里的文档子集对齐。 */
-const FILE_ACCEPT = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'text/plain',
-].join(',');
-
-/**
- * 传给 renderPresets 的 actions 数组，让 sender 渲染图片 + 附件两个上传按钮。
- * 不提供 action 字段 → sender 回落到内置默认 action，继续 emit fileSelect。
- */
-const senderActions: UploadActionConfig[] = [
-  { name: 'uploadImage', uploadProps: { multiple: true, accept: IMAGE_ACCEPT } },
-  { name: 'uploadAttachment', uploadProps: { multiple: true, accept: FILE_ACCEPT } },
-];
-
-/** 当前待发的附件列表，驱动 sender 的预览条。 */
-const pendingAttachments = ref<TdAttachmentItem[]>([]);
-
-/** sender 的 :attachments-props 绑定值，列表非空时显示预览条。 */
-const senderAttachmentsProps = computed(() => ({
-  items: pendingAttachments.value,
-  overflow: 'scrollX' as const,
-}));
-
-/**
- * sender 的 @file-select 事件：校验类型/大小后上传到 OSS，
- * 上传成功则把 TdAttachmentItem 追加到预览列表。
- */
-async function handleFileSelect({ files, name }: { files: File[]; name: string }) {
-  for (const file of files) {
-    if (!ALLOWED_MIME.has(file.type)) {
-      MessagePlugin.warning(`「${file.name}」格式不支持，请上传图片、PDF、Word、Excel、PPT 或 TXT 文件`);
-      continue;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      MessagePlugin.warning(`「${file.name}」超过 10 MB 限制`);
-      continue;
-    }
-
-    // 先在预览条占位，status=loading
-    const key = `${Date.now()}-${file.name}`;
-    const placeholder: TdAttachmentItem = {
-      key,
-      name: file.name,
-      size: file.size,
-      type: name === 'uploadImage' ? 'image' : 'file',
-      status: 'progress' as never,
-      percent: 0,
-      raw: file as never,
-    };
-    pendingAttachments.value = [...pendingAttachments.value, placeholder];
-
-    try {
-      const res = await uploadAttachment(file);
-      const url = res.data?.url ?? '';
-      // 后端只认 ossId（url/类型都不可信），按字符串存：雪花 ID 超出 JS 安全整数。
-      const ossId = String(res.data?.ossId ?? '');
-      pendingAttachments.value = pendingAttachments.value.map((item) =>
-        item.key === key ? { ...item, url, metadata: { ossId }, status: 'success' as never, percent: 100 } : item,
-      );
-    } catch (err) {
-      pendingAttachments.value = pendingAttachments.value.filter((item) => item.key !== key);
-      notifyError(err, `「${file.name}」上传失败`);
-    }
-  }
-}
-
-/** sender 的 @remove 事件：从预览列表中移除对应附件。 */
-function handleAttachmentRemove(e: CustomEvent<TdAttachmentItem>) {
-  const removed = e?.detail;
-  if (!removed?.key) return;
-  pendingAttachments.value = pendingAttachments.value.filter((item) => item.key !== removed.key);
-}
-
-// ---------- / 附件 ----------
 
 /**
  * 每轮流式结束（complete / stop / error）后存展示快照，刷新/切走都能恢复。
@@ -370,35 +248,20 @@ async function removeThread(threadId: string) {
   }
 }
 
-async function handleSend(prompt: string) {
-  const text = prompt.trim();
-  const hasAttachments = pendingAttachments.value.length > 0;
-  if (!text && !hasAttachments) return;
+async function handleSend({ prompt, attachments }: { prompt: string; attachments: SendAttachment[] }) {
+  if (!prompt && attachments.length === 0) return;
 
   if (!activeThreadId.value) {
     await newThread();
     if (!activeThreadId.value) return;
   }
 
-  // 只取上传成功的附件传给 engine，过滤掉仍在上传中或失败的占位项。
-  const attachments = pendingAttachments.value
-    .filter((item) => (item.status as string) === 'success' && item.metadata?.ossId)
-    .map((item) => ({
-      // fileType 只影响气泡里的图标/预览；后端按 OSS 记录的文件名自行判定类型。
-      fileType: (item.type === 'image' ? 'image' : 'txt') as 'image' | 'txt',
-      name: item.name ?? '',
-      url: item.url ?? '',
-      size: item.size ?? 0,
-      extension: item.name?.split('.').pop() ?? '',
-      metadata: item.metadata,
-    }));
-
-  inputValue.value = '';
-  pendingAttachments.value = [];
+  // 先确保会话就绪再清空输入，避免 newThread 失败时丢失用户已输入的内容。
+  senderRef.value?.clear();
 
   try {
     // 建完消息就 resolve，不等流式结束；落盘由 busy 的 watch 负责。
-    await chatEngine.value?.sendUserMessage({ prompt: text, attachments });
+    await chatEngine.value?.sendUserMessage({ prompt, attachments });
     scrollToBottom('smooth');
   } catch (err) {
     notifyError(err, '发送失败');
