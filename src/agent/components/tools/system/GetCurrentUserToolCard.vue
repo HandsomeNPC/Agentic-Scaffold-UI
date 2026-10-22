@@ -1,7 +1,13 @@
 <template>
   <t-card bordered style="margin-top: 8px">
+    <!-- 工具报错：后端 safeToolMiddleware 把 error 转成 result.error，由模型转述，这里同步展示 -->
+    <template v-if="status === 'complete' && result?.error">
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #e34d59">✕ 无法查询当前用户</div>
+      <div style="font-size: 12px; color: #666">{{ result.error }}</div>
+    </template>
+
     <!-- 已完成：展示后端返回的当前登录用户信息 -->
-    <template v-if="status === 'complete' && result">
+    <template v-else-if="status === 'complete' && result">
       <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #00a870">✓ 当前登录用户</div>
       <t-space direction="vertical" size="small" style="width: 100%">
         <div class="field">
@@ -66,6 +72,7 @@ import { computed } from 'vue';
 
 /** 返回值，对齐后端 currentUserResult（JSON tag 逐字段一致）。 */
 interface CurrentUserResult {
+  error?: string;
   userId?: number;
   userName?: string;
   nickName?: string;
