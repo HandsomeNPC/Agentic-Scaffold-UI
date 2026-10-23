@@ -41,6 +41,8 @@ interface MenuItem {
   path: string;
   type: '目录' | '菜单';
   external?: boolean;
+  /** 菜单配置的路由参数，后端原样给的 JSON 字符串 */
+  query?: string;
 }
 
 /** 返回值，对齐后端 myMenusResult。 */
@@ -66,7 +68,13 @@ function open(m: MenuItem) {
     window.open(m.path, '_blank', 'noopener');
     return;
   }
-  router.push(m.path);
+  let query: Record<string, any> | undefined;
+  try {
+    query = m.query ? JSON.parse(m.query) : undefined;
+  } catch {
+    query = undefined;
+  }
+  router.push({ path: m.path, query });
 }
 </script>
 <style scoped>

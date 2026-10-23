@@ -50,8 +50,11 @@ import {
   useChat,
 } from '@tdesign-vue-next/chat';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
+import type { LocalizedTitle } from '@/locales';
+import { useLocale } from '@/locales/useLocale';
 import { getToken } from '@/utils/auth';
 import { isHandledRequestError } from '@/utils/request';
 
@@ -64,10 +67,11 @@ import {
   loadMessages,
   saveMessages,
 } from '../api/thread';
-import type { ThreadVo } from '../api/types';
+import type { ClientState, ThreadVo } from '../api/types';
 import AgentHeader from './AgentHeader.vue';
 import type { SendAttachment } from './AgentSender.vue';
 import AgentSender from './AgentSender.vue';
+import { agentBusyKey } from './tools/context';
 import { toolcallActions } from './tools/register';
 
 const emit = defineEmits<{ close: [] }>();
@@ -83,6 +87,18 @@ const loadingHistory = ref(false);
 const senderRef = ref<{ clear: () => void } | null>(null);
 
 useAgentToolcall(toolcallActions);
+
+const route = useRoute();
+const { locale } = useLocale();
+
+/** 当前页面的界面状态，随每次对话请求上报，后端放进 session values 供工具判断用户在哪个页面。 */
+function currentClientState(): ClientState {
+  const title = route.meta?.title as LocalizedTitle | string | undefined;
+  return {
+    currentPath: route.path,
+    currentTitle: typeof title === 'string' ? title : (title?.[locale.value as keyof LocalizedTitle] ?? ''),
+  };
+}
 
 const { chatEngine, messages, status } = useChat({
   defaultMessages: [],
@@ -101,6 +117,7 @@ const { chatEngine, messages, status } = useChat({
       body: JSON.stringify({
         ...params,
         threadId: activeThreadId.value,
+        clientState: currentClientState(),
       }),
     }),
 
@@ -124,6 +141,7 @@ const { chatEngine, messages, status } = useChat({
 const listRef = ref<{ scrollToBottom: (opts: { behavior: 'auto' | 'smooth' }) => void } | null>(null);
 
 const busy = computed(() => status.value === 'pending' || status.value === 'streaming');
+provide(agentBusyKey, busy);
 
 /**
  * 每轮流式结束（complete / stop / error）后存展示快照，刷新/切走都能恢复。

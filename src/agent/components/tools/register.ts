@@ -15,6 +15,7 @@ import ListPostsToolCard from './system/ListPostsToolCard.vue';
 import ListRolesToolCard from './system/ListRolesToolCard.vue';
 import ListRoleUsersToolCard from './system/ListRoleUsersToolCard.vue';
 import LookupDictToolCard from './system/LookupDictToolCard.vue';
+import NavigateToMenuToolCard from './system/NavigateToMenuToolCard.vue';
 import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
 import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
 import SendMessageToolCard from './system/SendMessageToolCard.vue';
@@ -63,6 +64,12 @@ export const toolcallActions: AgentToolcallConfig[] = [
     description: '查询当前登录用户可见的目录与菜单，回答某功能在哪个菜单',
     parameters: [{ name: 'keyword', type: 'string', required: false }],
     component: GetMyMenusToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'NavigateToMenu',
+    description: '跳转到当前登录用户可见的某个菜单页面',
+    parameters: [{ name: 'menu', type: 'string', required: true }],
+    component: NavigateToMenuToolCard as AgentToolcallConfig['component'],
   },
   {
     name: 'LookupDict',

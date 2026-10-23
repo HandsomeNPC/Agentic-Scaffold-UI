@@ -28,6 +28,14 @@ export interface ResumeEntry {
   metadata?: Record<string, unknown>;
 }
 
+/** 随对话请求上报的前端界面状态，对齐后端 bo.ClientState */
+export interface ClientState {
+  /** 当前页面的前端路由，如 /system/user */
+  currentPath: string;
+  /** 当前页面标题（菜单名称），如 用户管理 */
+  currentTitle?: string;
+}
+
 /** POST /ai/threads/messages/save 的请求体 —— 前端 useChat messages 原样回传。 */
 export interface SaveMessagesRequest {
   threadId: string;
