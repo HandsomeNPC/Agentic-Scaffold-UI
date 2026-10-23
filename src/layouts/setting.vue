@@ -108,7 +108,7 @@
 import { useClipboard } from '@vueuse/core';
 import type { PopupVisibleChangeContext } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import SettingAutoIcon from '@/assets/assets-setting-auto.svg';
 import SettingDarkIcon from '@/assets/assets-setting-dark.svg';
@@ -208,9 +208,28 @@ const getThumbnailUrl = (name: string): string => {
   return `https://tdesign.gtimg.com/tdesign-pro/setting/${name}.png`;
 };
 
-watchEffect(() => {
-  if (formData.value.brandTheme) settingStore.updateConfig(formData.value);
-});
+// 只盯表单，不能用 watchEffect：updateConfig 内部会读 store.mode（changeBrandTheme → displayMode），
+// watchEffect 会把它也收为依赖，抽屉外一改 mode 就重跑、把表单里的旧 mode 写回去。
+watch(
+  formData,
+  (data) => {
+    if (data.brandTheme) settingStore.updateConfig(data);
+  },
+  { deep: true, immediate: true },
+);
+
+// 设置也会从抽屉外被改（如智能助手的 ChangeUISettings 工具），要同步回表单：否则表单停在旧值，
+// 用户下次在抽屉里点任一项，上面的 watch 会把整份旧表单写回 store、冲掉外部的改动。
+// 只在确有差异时替换，抽屉自己改出来的变化不会再触发一轮 updateConfig。
+const styleKeys = Object.keys(STYLE_CONFIG) as (keyof typeof STYLE_CONFIG)[];
+watch(
+  () => styleKeys.map((k) => settingStore[k]),
+  () => {
+    if (styleKeys.some((k) => formData.value[k] !== settingStore[k])) {
+      formData.value = Object.fromEntries(styleKeys.map((k) => [k, settingStore[k]])) as typeof formData.value;
+    }
+  },
+);
 </script>
 <!-- teleport导致drawer 内 scoped样式问题无法生效 先规避下 -->
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->

@@ -55,6 +55,8 @@ import { useRoute } from 'vue-router';
 
 import type { LocalizedTitle } from '@/locales';
 import { useLocale } from '@/locales/useLocale';
+import { useSettingStore, useTabsRouterStore } from '@/store';
+import type { TRouterInfo } from '@/types/interface';
 import { getToken } from '@/utils/auth';
 import { isHandledRequestError } from '@/utils/request';
 
@@ -90,13 +92,33 @@ useAgentToolcall(toolcallActions);
 
 const route = useRoute();
 const { locale } = useLocale();
+const settingStore = useSettingStore();
+const tabsRouterStore = useTabsRouterStore();
 
-/** 当前页面的界面状态，随每次对话请求上报，后端放进 session values 供工具判断用户在哪个页面。 */
+function localizedTitle(title?: LocalizedTitle | string): string {
+  return typeof title === 'string' ? title : (title?.[locale.value as keyof LocalizedTitle] ?? '');
+}
+
+/**
+ * 当前页面、多标签栏与界面设置，随每次对话请求上报，后端放进 session values：
+ * 工具据此判断用户在哪个页面、开了哪些标签，ChangeUISettings 也以这里的设置为基准算差异。
+ */
 function currentClientState(): ClientState {
-  const title = route.meta?.title as LocalizedTitle | string | undefined;
   return {
     currentPath: route.path,
-    currentTitle: typeof title === 'string' ? title : (title?.[locale.value as keyof LocalizedTitle] ?? ''),
+    currentTitle: localizedTitle(route.meta?.title as LocalizedTitle | string | undefined),
+    tabs: tabsRouterStore.tabRouters.map((t: TRouterInfo) => ({ path: t.path, title: localizedTitle(t.title) })),
+    settings: {
+      mode: settingStore.mode,
+      brandTheme: settingStore.brandTheme,
+      sideMode: settingStore.sideMode,
+      layout: settingStore.layout,
+      showHeader: settingStore.showHeader,
+      showBreadcrumb: settingStore.showBreadcrumb,
+      showFooter: settingStore.showFooter,
+      isUseTabsRouter: settingStore.isUseTabsRouter,
+      menuAutoCollapsed: settingStore.menuAutoCollapsed,
+    },
   };
 }
 

@@ -2,6 +2,7 @@ import type { AgentToolcallConfig } from '@tdesign-vue-next/chat';
 
 import DemoToolCard from './demo/DemoToolCard.vue';
 import AssignUserRolesToolCard from './system/AssignUserRolesToolCard.vue';
+import ChangeUISettingsToolCard from './system/ChangeUISettingsToolCard.vue';
 import ChangeUserStatusToolCard from './system/ChangeUserStatusToolCard.vue';
 import DraftNoticeToolCard from './system/DraftNoticeToolCard.vue';
 import GetCurrentUserToolCard from './system/GetCurrentUserToolCard.vue';
@@ -9,6 +10,7 @@ import GetDeptTreeToolCard from './system/GetDeptTreeToolCard.vue';
 import GetMyMenusToolCard from './system/GetMyMenusToolCard.vue';
 import GetMyMessagesToolCard from './system/GetMyMessagesToolCard.vue';
 import GetMyPermissionsToolCard from './system/GetMyPermissionsToolCard.vue';
+import GetOpenPagesToolCard from './system/GetOpenPagesToolCard.vue';
 import GetUserDetailToolCard from './system/GetUserDetailToolCard.vue';
 import ListDeptUsersToolCard from './system/ListDeptUsersToolCard.vue';
 import ListPostsToolCard from './system/ListPostsToolCard.vue';
@@ -70,6 +72,27 @@ export const toolcallActions: AgentToolcallConfig[] = [
     description: '跳转到当前登录用户可见的某个菜单页面',
     parameters: [{ name: 'menu', type: 'string', required: true }],
     component: NavigateToMenuToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'GetOpenPages',
+    description: '查询用户当前所在的页面与多标签栏里打开的页面',
+    parameters: [],
+    component: GetOpenPagesToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'ChangeUISettings',
+    description: '修改主题模式、主题色、侧边栏模式与界面元素开关，立即生效、可撤销',
+    parameters: [
+      { name: 'mode', type: 'string', required: false },
+      { name: 'brandTheme', type: 'string', required: false },
+      { name: 'sideMode', type: 'string', required: false },
+      { name: 'showHeader', type: 'boolean', required: false },
+      { name: 'showBreadcrumb', type: 'boolean', required: false },
+      { name: 'showFooter', type: 'boolean', required: false },
+      { name: 'isUseTabsRouter', type: 'boolean', required: false },
+      { name: 'menuAutoCollapsed', type: 'boolean', required: false },
+    ],
+    component: ChangeUISettingsToolCard as AgentToolcallConfig['component'],
   },
   {
     name: 'LookupDict',

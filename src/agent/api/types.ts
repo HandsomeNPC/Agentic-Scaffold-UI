@@ -34,6 +34,29 @@ export interface ClientState {
   currentPath: string;
   /** 当前页面标题（菜单名称），如 用户管理 */
   currentTitle?: string;
+  /** 多标签栏里的页面，按标签顺序 */
+  tabs?: ClientTab[];
+  /** 界面设置，字段名对齐 src/config/style.ts */
+  settings?: ClientSettings;
+}
+
+/** 多标签栏里的一个页面，对齐后端 bo.ClientTab */
+export interface ClientTab {
+  path: string;
+  title?: string;
+}
+
+/** 页面配置抽屉里的设置项，对齐后端 bo.ClientSettings */
+export interface ClientSettings {
+  mode: string;
+  brandTheme: string;
+  sideMode: string;
+  layout: string;
+  showHeader: boolean;
+  showBreadcrumb: boolean;
+  showFooter: boolean;
+  isUseTabsRouter: boolean;
+  menuAutoCollapsed: boolean;
 }
 
 /** POST /ai/threads/messages/save 的请求体 —— 前端 useChat messages 原样回传。 */
