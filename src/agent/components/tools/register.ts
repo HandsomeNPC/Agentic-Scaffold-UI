@@ -19,6 +19,7 @@ import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
 import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
 import SendMessageToolCard from './system/SendMessageToolCard.vue';
 import UnlockUserToolCard from './system/UnlockUserToolCard.vue';
+import UpdateMyAvatarToolCard from './system/UpdateMyAvatarToolCard.vue';
 import UpdateMyProfileToolCard from './system/UpdateMyProfileToolCard.vue';
 
 /**
@@ -163,6 +164,12 @@ export const toolcallActions: AgentToolcallConfig[] = [
       { name: 'phoneNumber', type: 'string', required: false },
     ],
     component: UpdateMyProfileToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'UpdateMyAvatar',
+    description: '修改当前登录用户本人的头像，由用户在卡片上选图并确认',
+    parameters: [],
+    component: UpdateMyAvatarToolCard as AgentToolcallConfig['component'],
   },
   {
     name: 'DraftNotice',
