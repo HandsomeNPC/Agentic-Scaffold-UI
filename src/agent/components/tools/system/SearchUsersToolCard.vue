@@ -45,8 +45,8 @@
           <span class="sub">{{ u.userName }}</span>
           <span v-if="u.deptName" class="sub">{{ u.deptName }}</span>
           <span v-if="u.phoneNumber" class="sub">{{ u.phoneNumber }}</span>
-          <t-tag :theme="u.status === '停用' ? 'danger' : 'success'" class="status" size="small" variant="light">
-            {{ u.status }}
+          <t-tag :theme="u.status === '1' ? 'danger' : 'success'" class="status" size="small" variant="light">
+            {{ selectDictLabel(dict.sys_normal_disable, u.status) }}
           </t-tag>
         </div>
       </t-loading>
@@ -88,7 +88,7 @@ import { selectDictLabel } from '@/utils/ruoyi';
  * result 由后端 jsonx 序列化，超界 ID 已是字符串。行 key 用 userName 同理（库里唯一）。
  */
 
-/** 单个用户，对齐后端 searchUserItem。status 已由后端翻成文字。 */
+/** 单个用户，对齐后端 searchUserItem。status 是 sys_normal_disable 字典键值，渲染时翻成文字。 */
 interface UserItem {
   userId: number | string;
   userName: string;
@@ -196,7 +196,7 @@ const rows = computed<UserItem[]>(() => {
     nickName: u.nickName,
     deptName: deptNames.value.get(String(u.deptId)),
     phoneNumber: u.phoneNumber,
-    status: selectDictLabel(dict.sys_normal_disable, u.status),
+    status: u.status,
   }));
 });
 

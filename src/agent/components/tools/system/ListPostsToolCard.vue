@@ -44,8 +44,8 @@
             <span class="name">{{ p.postName }}</span>
             <t-tag size="small" variant="outline">{{ p.postCode }}</t-tag>
             <span v-if="p.deptName" class="sub">{{ p.deptName }}</span>
-            <t-tag :theme="p.status === '停用' ? 'danger' : 'success'" class="status" size="small" variant="light">
-              {{ p.status }}
+            <t-tag :theme="p.status === '1' ? 'danger' : 'success'" class="status" size="small" variant="light">
+              {{ selectDictLabel(dict.sys_normal_disable, p.status) }}
             </t-tag>
           </div>
           <div v-if="p.remark" class="sub">{{ p.remark }}</div>
@@ -90,7 +90,7 @@ import { selectDictLabel } from '@/utils/ruoyi';
  * result 由后端 jsonx 序列化，超界 ID 已是字符串。行 key 用 postCode 同理。
  */
 
-/** 单个岗位，对齐后端 postItem。status 已由后端翻成文字。 */
+/** 单个岗位，对齐后端 postItem。status 是 sys_normal_disable 字典键值，渲染时翻成文字。 */
 interface PostItem {
   postId: number | string;
   postCode: string;
@@ -166,7 +166,7 @@ const rows = computed<PostItem[]>(() => {
     postCode: p.postCode,
     postName: p.postName,
     deptName: p.deptName || deptNames.value.get(String(p.deptId)),
-    status: selectDictLabel(dict.sys_normal_disable, p.status),
+    status: p.status,
     remark: p.remark,
   }));
 });

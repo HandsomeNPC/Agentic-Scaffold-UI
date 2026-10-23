@@ -14,9 +14,13 @@
     <template v-else-if="done">
       <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #00a870">✓ 公告已发布</div>
       <div class="row">
-        <t-tag v-if="done.noticeType" size="small" theme="primary" variant="light">{{ done.noticeType }}</t-tag>
+        <t-tag v-if="done.noticeType" size="small" theme="primary" variant="light">
+          {{ selectDictLabel(dict.sys_notice_type, done.noticeType) }}
+        </t-tag>
         <span class="title">{{ done.noticeTitle }}</span>
-        <t-tag v-if="done.status === '关闭'" size="small" theme="default" variant="light">已关闭</t-tag>
+        <t-tag v-if="done.status === '1'" size="small" theme="default" variant="light">
+          已{{ selectDictLabel(dict.sys_notice_status, done.status) }}
+        </t-tag>
       </div>
       <div style="font-size: 12px; color: #999; margin-top: 4px">
         已推送给全部在线用户，可在「通知公告」菜单中查看与编辑。
@@ -68,6 +72,7 @@
 import { computed, reactive, watch } from 'vue';
 
 import { useDict } from '@/utils/dict';
+import { selectDictLabel } from '@/utils/ruoyi';
 
 import type { ResumeEntry } from '../../../api/types';
 
@@ -87,7 +92,7 @@ interface DraftNoticeArgs {
   status?: string;
 }
 
-/** 返回值，对齐后端 draftNoticeResult。noticeType、status 已由后端翻成文字。 */
+/** 返回值，对齐后端 draftNoticeResult。noticeType、status 是字典键值，渲染时翻成文字。 */
 interface DraftNoticeResult {
   error?: string;
   cancelled?: boolean;

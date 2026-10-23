@@ -32,8 +32,8 @@
           <div class="row">
             <span class="name">{{ r.roleName }}</span>
             <t-tag size="small" variant="outline">{{ r.roleKey }}</t-tag>
-            <t-tag :theme="r.status === '停用' ? 'danger' : 'success'" class="status" size="small" variant="light">
-              {{ r.status }}
+            <t-tag :theme="r.status === '1' ? 'danger' : 'success'" class="status" size="small" variant="light">
+              {{ selectDictLabel(dict.sys_normal_disable, r.status) }}
             </t-tag>
           </div>
           <div v-if="r.dataScope || r.remark" class="sub">
@@ -76,7 +76,7 @@ import { selectDictLabel } from '@/utils/ruoyi';
  * 不再经过 Agent。行 key 用 roleKey：雪花 roleId 经 JSON.parse 会丢精度。
  */
 
-/** 单个角色，对齐后端 roleItem。dataScope、status 已由后端翻成文字。 */
+/** 单个角色，对齐后端 roleItem。dataScope 已由后端翻成文字；status 是 sys_normal_disable 字典键值，渲染时翻成文字。 */
 interface RoleItem {
   roleId: number | string;
   roleName: string;
@@ -135,7 +135,7 @@ const rows = computed<RoleItem[]>(() => {
     roleName: r.roleName,
     roleKey: r.roleKey,
     dataScope: dataScopeLabels[r.dataScope],
-    status: selectDictLabel(dict.sys_normal_disable, r.status),
+    status: r.status,
     remark: r.remark,
   }));
 });

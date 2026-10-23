@@ -20,9 +20,9 @@
       <div class="field">
         <span class="label">状态</span>
         <span class="value">
-          <t-tag :theme="statusTheme(done.before)" size="small" variant="light">{{ done.before }}</t-tag>
+          <t-tag :theme="statusTheme(done.before)" size="small" variant="light">{{ statusLabel(done.before) }}</t-tag>
           <span class="arrow">→</span>
-          <t-tag :theme="statusTheme(done.after)" size="small" variant="light">{{ done.after }}</t-tag>
+          <t-tag :theme="statusTheme(done.after)" size="small" variant="light">{{ statusLabel(done.after) }}</t-tag>
         </span>
       </div>
     </template>
@@ -52,11 +52,15 @@
         <div class="field">
           <span class="label">状态</span>
           <span class="value">
-            <template v-if="beforeLabel">
-              <t-tag :theme="statusTheme(beforeLabel)" size="small" variant="light">{{ beforeLabel }}</t-tag>
+            <template v-if="target">
+              <t-tag :theme="statusTheme(target.status)" size="small" variant="light">
+                {{ statusLabel(target.status) }}
+              </t-tag>
               <span class="arrow">→</span>
             </template>
-            <t-tag :theme="statusTheme(afterLabel)" size="small" variant="light">{{ afterLabel }}</t-tag>
+            <t-tag :theme="statusTheme(args?.status)" size="small" variant="light">
+              {{ statusLabel(args?.status) }}
+            </t-tag>
           </span>
         </div>
         <div v-if="lookupHint" style="font-size: 12px; color: #e34d59; margin-top: 4px">{{ lookupHint }}</div>
@@ -98,7 +102,7 @@ interface ChangeUserStatusArgs {
   status?: string;
 }
 
-/** 返回值，对齐后端 changeUserStatusResult。before / after 已由后端翻成文字。 */
+/** 返回值，对齐后端 changeUserStatusResult。before / after 是 sys_normal_disable 字典键值，渲染时翻成文字。 */
 interface ChangeUserStatusResult {
   error?: string;
   cancelled?: boolean;
@@ -129,13 +133,12 @@ const target = ref<UserVO | null>(null);
 const loading = ref(false);
 const lookupHint = ref('');
 
-const beforeLabel = computed(() => (target.value ? selectDictLabel(dict.sys_normal_disable, target.value.status) : ''));
-const afterLabel = computed(() =>
-  props.args?.status ? selectDictLabel(dict.sys_normal_disable, props.args.status) || props.args.status : '-',
-);
+function statusLabel(value?: string) {
+  return value ? selectDictLabel(dict.sys_normal_disable, value) : '-';
+}
 
-function statusTheme(label?: string) {
-  return label === '停用' ? 'danger' : 'success';
+function statusTheme(value?: string) {
+  return value === '1' ? 'danger' : 'success';
 }
 
 /** 账号条件是模糊匹配，在结果里挑出完全相等的那个。 */

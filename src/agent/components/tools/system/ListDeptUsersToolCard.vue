@@ -34,8 +34,8 @@
           <span class="name">{{ u.nickName || u.userName }}</span>
           <span class="sub">{{ u.userName }}</span>
           <span v-if="u.phoneNumber" class="sub">{{ u.phoneNumber }}</span>
-          <t-tag :theme="u.status === '停用' ? 'danger' : 'success'" class="status" size="small" variant="light">
-            {{ u.status }}
+          <t-tag :theme="u.status === '1' ? 'danger' : 'success'" class="status" size="small" variant="light">
+            {{ selectDictLabel(dict.sys_normal_disable, u.status) }}
           </t-tag>
         </div>
       </t-loading>
@@ -77,7 +77,7 @@ import { selectDictLabel } from '@/utils/ruoyi';
  * result 由后端 jsonx 序列化，超界 ID 已是字符串。行 key 用 userName 同理（库里唯一）。
  */
 
-/** 单个成员，对齐后端 deptUserItem。status 已由后端翻成文字。 */
+/** 单个成员，对齐后端 deptUserItem。status 是 sys_normal_disable 字典键值，渲染时翻成文字。 */
 interface DeptUserItem {
   userId: number | string;
   userName: string;
@@ -114,7 +114,7 @@ const pageNum = ref(1);
 const pageSize = ref(10);
 const loading = ref(false);
 /** 卡片自己查到的全量成员；为 null 时展示工具结果。 */
-const allRows = ref<(DeptUserItem & { rawStatus: string })[] | null>(null);
+const allRows = ref<DeptUserItem[] | null>(null);
 
 const filteredRows = computed(() => {
   if (!allRows.value) return [];
@@ -124,7 +124,7 @@ const filteredRows = computed(() => {
     (u) =>
       (!kw || u.userName.toLowerCase().includes(kw) || u.nickName.toLowerCase().includes(kw)) &&
       (!phone || (u.phoneNumber ?? '').includes(phone)) &&
-      (!applied.status || u.rawStatus === applied.status),
+      (!applied.status || u.status === applied.status),
   );
 });
 
@@ -151,8 +151,7 @@ async function loadAll() {
       userName: u.userName,
       nickName: u.nickName,
       phoneNumber: u.phoneNumber,
-      status: selectDictLabel(dict.sys_normal_disable, u.status),
-      rawStatus: u.status,
+      status: u.status,
     }));
   } catch {
     // 错误提示由 request 拦截器统一弹出，保留当前数据

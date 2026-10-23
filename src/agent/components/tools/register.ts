@@ -16,7 +16,6 @@ import ListDeptUsersToolCard from './system/ListDeptUsersToolCard.vue';
 import ListPostsToolCard from './system/ListPostsToolCard.vue';
 import ListRolesToolCard from './system/ListRolesToolCard.vue';
 import ListRoleUsersToolCard from './system/ListRoleUsersToolCard.vue';
-import LookupDictToolCard from './system/LookupDictToolCard.vue';
 import NavigateToMenuToolCard from './system/NavigateToMenuToolCard.vue';
 import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
 import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
@@ -101,15 +100,6 @@ export const toolcallActions: AgentToolcallConfig[] = [
     description: '进入或退出浏览器全屏，进入全屏需用户点击卡片按钮',
     parameters: [{ name: 'fullscreen', type: 'boolean', required: true }],
     component: SetFullscreenToolCard as AgentToolcallConfig['component'],
-  },
-  {
-    name: 'LookupDict',
-    description: '按字典类型查询字典选项，把编码值翻译成文字',
-    parameters: [
-      { name: 'dictType', type: 'string', required: true },
-      { name: 'value', type: 'string', required: false },
-    ],
-    component: LookupDictToolCard as AgentToolcallConfig['component'],
   },
   {
     name: 'SearchUsers',

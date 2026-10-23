@@ -30,9 +30,13 @@
         <div v-if="!rows.length" style="font-size: 12px; color: #999">没有匹配的通知公告</div>
         <div v-for="(n, i) in rows" :key="i" class="item">
           <div class="row">
-            <t-tag size="small" theme="primary" variant="light">{{ n.noticeType }}</t-tag>
+            <t-tag size="small" theme="primary" variant="light">
+              {{ selectDictLabel(dict.sys_notice_type, n.noticeType) }}
+            </t-tag>
             <span class="title">{{ n.noticeTitle }}</span>
-            <t-tag v-if="n.status === '关闭'" size="small" theme="default" variant="light">已关闭</t-tag>
+            <t-tag v-if="n.status === '1'" size="small" theme="default" variant="light">
+              已{{ selectDictLabel(dict.sys_notice_status, n.status) }}
+            </t-tag>
           </div>
           <div v-if="n.summary" class="summary">{{ n.summary }}</div>
           <div class="meta">
@@ -79,7 +83,7 @@ import { selectDictLabel } from '@/utils/ruoyi';
  * 标题可能重复、雪花 noticeId 经 JSON.parse 会丢精度，故行 key 用下标（列表只读、不重排）。
  */
 
-/** 单条公告，对齐后端 noticeItem。noticeType、status 已由后端翻成文字。 */
+/** 单条公告，对齐后端 noticeItem。noticeType、status 是字典键值，渲染时翻成文字。 */
 interface NoticeItem {
   noticeId: number | string;
   noticeTitle: string;
@@ -151,8 +155,8 @@ const rows = computed<NoticeItem[]>(() => {
   return apiRows.value.map((n) => ({
     noticeId: n.noticeId,
     noticeTitle: n.noticeTitle,
-    noticeType: selectDictLabel(dict.sys_notice_type, n.noticeType),
-    status: selectDictLabel(dict.sys_notice_status, n.status),
+    noticeType: n.noticeType,
+    status: n.status,
     summary: toSummary(n.noticeContent),
     createByName: n.createByName,
     createTime: n.createTime,

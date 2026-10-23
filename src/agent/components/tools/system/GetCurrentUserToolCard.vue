@@ -24,7 +24,7 @@
         </div>
         <div v-if="result.gender" class="field">
           <span class="label">性别</span>
-          <span class="value">{{ result.gender }}</span>
+          <span class="value">{{ selectDictLabel(dict.sys_user_gender, result.gender) }}</span>
         </div>
         <div v-if="result.email" class="field">
           <span class="label">邮箱</span>
@@ -62,6 +62,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
+import { useDict } from '@/utils/dict';
+import { selectDictLabel } from '@/utils/ruoyi';
+
 /**
  * GetCurrentUser 工具卡片（只读，非 HITL）。
  *
@@ -79,6 +82,7 @@ interface CurrentUserResult {
   deptName?: string;
   email?: string;
   phoneNumber?: string;
+  /** sys_user_gender 字典键值，渲染时翻成文字。 */
   gender?: string;
   roles?: string[];
   posts?: string[];
@@ -94,6 +98,9 @@ const props = defineProps<{
   respond?: (response: unknown[]) => void;
 }>();
 
+// 不解构：字典未缓存时 useDict 异步赋值，解构出来的会一直是初始的空数组。
+const dict = useDict('sys_user_gender');
+
 /** loginDate 是 RFC3339 字符串，本地化为可读形式；解析失败原样回显。 */
 const loginDateText = computed(() => {
   const raw = props.result?.loginDate;
@@ -104,7 +111,6 @@ const loginDateText = computed(() => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 });
 </script>
-
 <style scoped>
 .field {
   display: flex;

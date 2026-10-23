@@ -12,12 +12,12 @@
         ✓ 用户详情
         <t-tag
           v-if="result.status"
-          :theme="result.status === '停用' ? 'danger' : 'success'"
+          :theme="result.status === '1' ? 'danger' : 'success'"
           size="small"
           style="margin-left: 4px"
           variant="light"
         >
-          {{ result.status }}
+          {{ selectDictLabel(dict.sys_normal_disable, result.status) }}
         </t-tag>
       </div>
       <t-space direction="vertical" size="small" style="width: 100%">
@@ -35,7 +35,7 @@
         </div>
         <div v-if="result.gender" class="field">
           <span class="label">性别</span>
-          <span class="value">{{ result.gender }}</span>
+          <span class="value">{{ selectDictLabel(dict.sys_user_gender, result.gender) }}</span>
         </div>
         <div v-if="result.email" class="field">
           <span class="label">邮箱</span>
@@ -79,11 +79,14 @@
   </t-card>
 </template>
 <script lang="ts" setup>
+import { useDict } from '@/utils/dict';
+import { selectDictLabel } from '@/utils/ruoyi';
+
 /**
  * GetUserDetail 工具卡片（只读，非 HITL）。
  *
  * 注册为 `GetUserDetail` 工具的渲染组件（见 register.ts）。字段口径对齐 GetCurrentUser 卡片，
- * 另加状态、创建时间与备注；性别、状态已由后端翻成文字。
+ * 另加状态、创建时间与备注；性别、状态是字典键值，渲染时翻成文字。
  */
 
 /** 返回值，对齐后端 userDetailResult（JSON tag 逐字段一致）。 */
@@ -111,6 +114,9 @@ defineProps<{
   args?: { userId?: number | string };
   respond?: (response: unknown[]) => void;
 }>();
+
+// 不解构：字典未缓存时 useDict 异步赋值，解构出来的会一直是初始的空数组。
+const dict = useDict('sys_user_gender', 'sys_normal_disable');
 
 /** 时间是 RFC3339 字符串，本地化为可读形式；解析失败原样回显。 */
 function formatTime(raw?: string) {
