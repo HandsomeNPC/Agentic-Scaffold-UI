@@ -21,6 +21,7 @@ import NavigateToMenuToolCard from './system/NavigateToMenuToolCard.vue';
 import SearchNoticesToolCard from './system/SearchNoticesToolCard.vue';
 import SearchUsersToolCard from './system/SearchUsersToolCard.vue';
 import SendMessageToolCard from './system/SendMessageToolCard.vue';
+import SetFullscreenToolCard from './system/SetFullscreenToolCard.vue';
 import UnlockUserToolCard from './system/UnlockUserToolCard.vue';
 import UpdateMyAvatarToolCard from './system/UpdateMyAvatarToolCard.vue';
 import UpdateMyProfileToolCard from './system/UpdateMyProfileToolCard.vue';
@@ -81,11 +82,12 @@ export const toolcallActions: AgentToolcallConfig[] = [
   },
   {
     name: 'ChangeUISettings',
-    description: '修改主题模式、主题色、侧边栏模式与界面元素开关，立即生效、可撤销',
+    description: '修改主题模式、主题色、侧边栏模式、布局大小与界面元素开关，立即生效、可撤销',
     parameters: [
       { name: 'mode', type: 'string', required: false },
       { name: 'brandTheme', type: 'string', required: false },
       { name: 'sideMode', type: 'string', required: false },
+      { name: 'layoutSize', type: 'string', required: false },
       { name: 'showHeader', type: 'boolean', required: false },
       { name: 'showBreadcrumb', type: 'boolean', required: false },
       { name: 'showFooter', type: 'boolean', required: false },
@@ -93,6 +95,12 @@ export const toolcallActions: AgentToolcallConfig[] = [
       { name: 'menuAutoCollapsed', type: 'boolean', required: false },
     ],
     component: ChangeUISettingsToolCard as AgentToolcallConfig['component'],
+  },
+  {
+    name: 'SetFullscreen',
+    description: '进入或退出浏览器全屏，进入全屏需用户点击卡片按钮',
+    parameters: [{ name: 'fullscreen', type: 'boolean', required: true }],
+    component: SetFullscreenToolCard as AgentToolcallConfig['component'],
   },
   {
     name: 'LookupDict',

@@ -7,9 +7,9 @@
     </t-tooltip>
     <template #dropdown>
       <t-dropdown-item
-        v-for="o in options"
+        v-for="o in LAYOUT_SIZE_OPTIONS"
         :key="o.value"
-        :class="{ 'is-active': current === o.value }"
+        :class="{ 'is-active': layoutSize === o.value }"
         :value="o.value"
       >
         {{ o.label }}
@@ -18,37 +18,13 @@
   </t-dropdown>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { isLayoutSize, LAYOUT_SIZE_OPTIONS, useLayoutSize } from '@/hooks/useLayoutSize';
 
-import cache from '@/plugins/cache';
-
-const SIZE_KEY = 'layout-size';
-const options = [
-  { label: '大', value: 'large' },
-  { label: '中', value: 'medium' },
-  { label: '小', value: 'small' },
-];
-
-const current = ref<string>('medium');
-
-const apply = (val: string) => {
-  current.value = val;
-  if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-size', val);
-  }
-};
+const { layoutSize, setLayoutSize } = useLayoutSize();
 
 const onChange = (data: any) => {
-  const val = String(data?.value ?? '');
-  if (!val) return;
-  apply(val);
-  cache.local.set(SIZE_KEY, val);
+  if (isLayoutSize(data?.value)) setLayoutSize(data.value);
 };
-
-onMounted(() => {
-  const saved = cache.local.get(SIZE_KEY);
-  apply(saved && options.some((o) => o.value === saved) ? saved : 'medium');
-});
 </script>
 <style lang="less" scoped>
 .is-active {

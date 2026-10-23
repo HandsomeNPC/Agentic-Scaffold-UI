@@ -4,8 +4,9 @@
   </t-config-provider>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 
+import { useLayoutSize } from '@/hooks/useLayoutSize';
 import { useLocale } from '@/locales/useLocale';
 import { useSettingStore } from '@/store';
 
@@ -16,6 +17,10 @@ const mode = computed(() => {
 });
 
 const { getComponentsLocale, locale } = useLocale();
+
+// 在根组件恢复布局大小，不放在顶栏的下拉里：顶栏可以被隐藏，隐藏后刷新就丢了。
+const { restoreLayoutSize } = useLayoutSize();
+onMounted(restoreLayoutSize);
 </script>
 <style lang="less" scoped>
 #nprogress .bar {

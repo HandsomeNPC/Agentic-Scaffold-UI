@@ -53,6 +53,7 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { useLayoutSize } from '@/hooks/useLayoutSize';
 import type { LocalizedTitle } from '@/locales';
 import { useLocale } from '@/locales/useLocale';
 import { useSettingStore, useTabsRouterStore } from '@/store';
@@ -94,6 +95,7 @@ const route = useRoute();
 const { locale } = useLocale();
 const settingStore = useSettingStore();
 const tabsRouterStore = useTabsRouterStore();
+const { layoutSize } = useLayoutSize();
 
 function localizedTitle(title?: LocalizedTitle | string): string {
   return typeof title === 'string' ? title : (title?.[locale.value as keyof LocalizedTitle] ?? '');
@@ -113,6 +115,8 @@ function currentClientState(): ClientState {
       brandTheme: settingStore.brandTheme,
       sideMode: settingStore.sideMode,
       layout: settingStore.layout,
+      layoutSize: layoutSize.value,
+      fullscreen: !!document.fullscreenElement,
       showHeader: settingStore.showHeader,
       showBreadcrumb: settingStore.showBreadcrumb,
       showFooter: settingStore.showFooter,

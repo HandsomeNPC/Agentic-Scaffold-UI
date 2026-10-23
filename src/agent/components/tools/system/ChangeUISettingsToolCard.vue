@@ -42,6 +42,7 @@
 <script lang="ts" setup>
 import { computed, inject, ref, watch } from 'vue';
 
+import { isLayoutSize, useLayoutSize } from '@/hooks/useLayoutSize';
 import { useSettingStore } from '@/store';
 import type { TState } from '@/store/modules/setting';
 
@@ -53,14 +54,15 @@ import { agentBusyKey } from '../context';
  * 注册为 `ChangeUISettings` 工具的渲染组件（见 register.ts）。后端以本轮上报的设置为基准算出
  * 要改的项（settings）与改前的值（before），卡片拿到后写进 settingStore，由 updateConfig 统一
  * 生效主题模式 / 主题色 / 侧边栏模式，并随 pinia 持久化，与在页面配置抽屉里改等价。
+ * 布局大小不在 settingStore 里，单独交给 useLayoutSize，与顶栏的布局大小下拉等价。
  *
  * 只对本轮实时返回的结果自动应用（见 agentBusyKey）：切换会话、刷新恢复的历史卡片只展示，
  * 由用户手动点「应用」，否则翻一下历史主题就被改回去。
  */
 
-/** 设置项，字段名对齐 src/config/style.ts 与后端 uiSettingsPatch，只含有变化的项。 */
+/** 设置项，对齐后端 uiSettingsPatch，只含有变化的项。除 layoutSize 外字段名对齐 src/config/style.ts。 */
 type SettingsPatch = Partial<
-  Record<'mode' | 'brandTheme' | 'sideMode', string> &
+  Record<'mode' | 'brandTheme' | 'sideMode' | 'layoutSize', string> &
     Record<'showHeader' | 'showBreadcrumb' | 'showFooter' | 'isUseTabsRouter' | 'menuAutoCollapsed', boolean>
 >;
 
@@ -90,6 +92,7 @@ const props = defineProps<{
 }>();
 
 const settingStore = useSettingStore();
+const { setLayoutSize } = useLayoutSize();
 const chatBusy = inject(agentBusyKey, ref(false));
 
 const applied = ref(false);
@@ -107,21 +110,28 @@ const headingColor = computed(() => (applied.value ? '#00a870' : '#999'));
  * 只切模式时补上当前主题色：主题色的色阶按「色值 + 模式」分别生成，changeMode 不会重算，
  * 不补的话深色模式下沿用的是明亮模式的色阶。mode 须排在 brandTheme 前，updateConfig 按键序生效。
  */
-function patchOf(p?: SettingsPatch): Partial<TState> {
-  const patch: Partial<TState> = Object.fromEntries(Object.entries(p ?? {}).filter(([, v]) => v !== '' && v != null));
+function patchOf(p: SettingsPatch): Partial<TState> {
+  const patch: Partial<TState> = Object.fromEntries(Object.entries(p).filter(([, v]) => v !== '' && v != null));
   if (patch.mode && !patch.brandTheme) patch.brandTheme = settingStore.brandTheme;
   return patch;
 }
 
+function applyPatch(p?: SettingsPatch) {
+  const { layoutSize, ...rest } = p ?? {};
+  if (isLayoutSize(layoutSize)) setLayoutSize(layoutSize);
+  const patch = patchOf(rest);
+  if (Object.keys(patch).length) settingStore.updateConfig(patch);
+}
+
 function apply() {
   if (!props.result?.settings) return;
-  settingStore.updateConfig(patchOf(props.result.settings));
+  applyPatch(props.result.settings);
   applied.value = true;
   undone.value = false;
 }
 
 function undo() {
-  settingStore.updateConfig(patchOf(props.result?.before));
+  applyPatch(props.result?.before);
   applied.value = false;
   undone.value = true;
 }

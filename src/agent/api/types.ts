@@ -52,6 +52,10 @@ export interface ClientSettings {
   brandTheme: string;
   sideMode: string;
   layout: string;
+  /** 布局大小 small / medium / large，不在 settingStore 里，见 hooks/useLayoutSize */
+  layoutSize: string;
+  /** 浏览器当前是否全屏 */
+  fullscreen: boolean;
   showHeader: boolean;
   showBreadcrumb: boolean;
   showFooter: boolean;
