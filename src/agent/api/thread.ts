@@ -2,7 +2,14 @@ import type { PageResult } from '@/api/types';
 import type { AxiosPromise } from '@/utils/api-types';
 import request from '@/utils/request';
 
-import type { AbortVo, DisplayMessagesVo, SaveMessagesRequest, ThreadQuery, ThreadVo } from './types';
+import type {
+  AbortVo,
+  AttachmentUploadVo,
+  DisplayMessagesVo,
+  SaveMessagesRequest,
+  ThreadQuery,
+  ThreadVo,
+} from './types';
 
 // threadId 一律按字符串传：雪花 19 位超出 JS 安全整数，后端 jsonx 两种形态都认。
 
@@ -37,11 +44,13 @@ export const abortThread = (threadId: string): AxiosPromise<AbortVo> =>
 export const CHAT_ENDPOINT = `${import.meta.env.VITE_APP_BASE_API}/ai/threads/chat`;
 
 /**
- * 上传附件到 OSS。
+ * 上传对话附件（不是 /resource/oss：那边跟着后台默认存储走）。
  * 走 multipart/form-data（axios 自动设置 Content-Type），不走 apiencrypt。
+ * 后端 transport=url：传进专用私有桶，返回 attachmentId + 有时效的预签名地址（重新加载会话时后端会换新）；
+ * transport=base64：不落存储，只校验并返回 data URL，发送时随消息原样回传。
  */
-export const uploadAttachment = (file: File): AxiosPromise<{ url: string; fileName: string; ossId: string }> => {
+export const uploadAttachment = (file: File): AxiosPromise<AttachmentUploadVo> => {
   const form = new FormData();
   form.append('file', file);
-  return request({ url: '/resource/oss/upload', method: 'post', data: form });
+  return request({ url: '/ai/threads/attachments', method: 'post', data: form });
 };

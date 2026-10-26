@@ -75,6 +75,18 @@ export interface DisplayMessagesVo {
   messages: unknown[];
 }
 
+/** POST /ai/threads/attachments 的返回体（对齐后端 vo.AttachmentUploadVo） */
+export interface AttachmentUploadVo {
+  /** 雪花 ID，按字符串处理。后端 transport=base64 时没有该字段 */
+  attachmentId?: string;
+  name: string;
+  /** transport=url 时是有时效的预签名展示地址；transport=base64 时是 data URL */
+  url: string;
+  size: number;
+  fileType: string;
+  extension: string;
+}
+
 /** POST /ai/threads/abort 的返回体 */
 export interface AbortVo {
   aborted: boolean;

@@ -22,7 +22,7 @@ export interface SendAttachment {
   url: string;
   size: number;
   extension: string;
-  metadata?: { ossId?: string } & Record<string, unknown>;
+  metadata?: { attachmentId?: string } & Record<string, unknown>;
 }
 </script>
 <script lang="ts" setup>
@@ -48,7 +48,8 @@ const inputValue = ref('');
 
 /**
  * 允许上传的 MIME 类型白名单。
- * 后端 OSS handler 按 10 MB 上限，此处做前置过滤，减少无效请求。
+ * 与后端 attachment.allowedMIME 对齐（不收音视频与 svg），大小上限对齐 ai.attachment.maxSizeMB，
+ * 此处只做前置过滤，减少无效请求，以后端校验为准。
  */
 const ALLOWED_MIME = new Set([
   // 图片
@@ -67,7 +68,7 @@ const ALLOWED_MIME = new Set([
   'text/plain',
 ]);
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB，与后端 maxUploadSize 对齐
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB，与后端 ai.attachment.maxSizeMB 默认值对齐
 
 /** 图片 picker 的 accept 列表，与 ALLOWED_MIME 里的图片子集对齐。 */
 const IMAGE_ACCEPT = 'image/jpeg,image/png,image/gif,image/webp';
@@ -133,10 +134,13 @@ async function handleFileSelect({ files, name }: { files: File[]; name: string }
     try {
       const res = await uploadAttachment(file);
       const url = res.data?.url ?? '';
-      // 后端只认 ossId（url/类型都不可信），按字符串存：雪花 ID 超出 JS 安全整数。
-      const ossId = String(res.data?.ossId ?? '');
+      // 后端 transport=url 时返回 attachmentId，url 是有时效的预览地址：后端只认 ID，按字符串存
+      // （雪花 ID 超出 JS 安全整数），它也随展示消息落库，后端加载历史时按它把过期的 url 换新。
+      // transport=base64 时不返回 ID，url 是 data URL，发送时原样回传、由后端重新校验。
+      const attachmentId = res.data?.attachmentId ? String(res.data.attachmentId) : '';
+      const metadata = attachmentId ? { attachmentId } : undefined;
       pendingAttachments.value = pendingAttachments.value.map((item) =>
-        item.key === key ? { ...item, url, metadata: { ossId }, status: 'success' as never, percent: 100 } : item,
+        item.key === key ? { ...item, url, metadata, status: 'success' as never, percent: 100 } : item,
       );
     } catch (err) {
       pendingAttachments.value = pendingAttachments.value.filter((item) => item.key !== key);
@@ -163,7 +167,7 @@ function handleSend(prompt: string) {
 
   // 只取上传成功的附件传给 engine，过滤掉仍在上传中或失败的占位项。
   const attachments: SendAttachment[] = pendingAttachments.value
-    .filter((item) => (item.status as string) === 'success' && item.metadata?.ossId)
+    .filter((item) => (item.status as string) === 'success' && (item.metadata?.attachmentId || isDataURL(item.url)))
     .map((item) => ({
       // fileType 只影响气泡里的图标/预览；后端按 OSS 记录的文件名自行判定类型。
       fileType: (item.type === 'image' ? 'image' : 'txt') as 'image' | 'txt',
@@ -175,6 +179,11 @@ function handleSend(prompt: string) {
     }));
 
   emit('send', { prompt: text, attachments });
+}
+
+/** 后端 transport=base64 时附件以 data URL 回传。 */
+function isDataURL(url?: string) {
+  return !!url && url.startsWith('data:');
 }
 
 function handleStop() {
