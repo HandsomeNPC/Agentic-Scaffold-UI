@@ -77,14 +77,22 @@ export interface DisplayMessagesVo {
 
 /** POST /ai/threads/attachments 的返回体（对齐后端 vo.AttachmentUploadVo） */
 export interface AttachmentUploadVo {
-  /** 雪花 ID，按字符串处理。后端 transport=base64 时没有该字段 */
-  attachmentId?: string;
+  /** 雪花 ID，按字符串处理 */
+  attachmentId: string;
   name: string;
-  /** transport=url 时是有时效的预签名展示地址；transport=base64 时是 data URL */
+  /** 有时效的预签名展示地址 */
   url: string;
   size: number;
   fileType: string;
   extension: string;
+}
+
+/** GET /ai/threads/attachments/config 的返回体（对齐后端 vo.AttachmentConfigVo） */
+export interface AttachmentConfigVo {
+  /** 是否开启附件上传，关闭时不显示上传按钮 */
+  enable: boolean;
+  /** 单文件上限（MB），未开启时为 0 */
+  maxSizeMB: number;
 }
 
 /** POST /ai/threads/abort 的返回体 */

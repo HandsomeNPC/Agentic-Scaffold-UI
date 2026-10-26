@@ -29,11 +29,11 @@ export interface SendAttachment {
 import type { TdAttachmentItem, UploadActionConfig } from '@tdesign-vue-next/chat';
 import { ChatSender as TChatSender } from '@tdesign-vue-next/chat';
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 import { isHandledRequestError } from '@/utils/request';
 
-import { uploadAttachment } from '../api/thread';
+import { getAttachmentConfig, uploadAttachment } from '../api/thread';
 
 defineProps<{ loading: boolean }>();
 
@@ -48,7 +48,7 @@ const inputValue = ref('');
 
 /**
  * 允许上传的 MIME 类型白名单。
- * 与后端 attachment.allowedMIME 对齐（不收音视频与 svg），大小上限对齐 ai.attachment.maxSizeMB，
+ * 与后端 attachment.allowedMIME 对齐（不收音视频与 svg），大小上限取后端 ai.attachment.maxSizeMB，
  * 此处只做前置过滤，减少无效请求，以后端校验为准。
  */
 const ALLOWED_MIME = new Set([
@@ -67,8 +67,6 @@ const ALLOWED_MIME = new Set([
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'text/plain',
 ]);
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB，与后端 ai.attachment.maxSizeMB 默认值对齐
 
 /** 图片 picker 的 accept 列表，与 ALLOWED_MIME 里的图片子集对齐。 */
 const IMAGE_ACCEPT = 'image/jpeg,image/png,image/gif,image/webp';
@@ -89,10 +87,27 @@ const FILE_ACCEPT = [
  * 不提供 action 字段 → sender 回落到内置默认 action，继续 emit fileSelect；
  * 故用断言绕开 UploadActionConfig.action 必填的类型标注。
  */
-const senderActions = [
+const UPLOAD_ACTIONS = [
   { name: 'uploadImage', uploadProps: { multiple: true, accept: IMAGE_ACCEPT } },
   { name: 'uploadAttachment', uploadProps: { multiple: true, accept: FILE_ACCEPT } },
 ] as unknown as UploadActionConfig[];
+
+/** 后端未开启附件上传（或配置还没取到、取失败）时为 false，不显示上传按钮。 */
+const uploadEnabled = ref(false);
+const maxSizeMB = ref(0);
+
+/** 空数组 → sender 只渲染发送按钮。 */
+const senderActions = computed(() => (uploadEnabled.value ? UPLOAD_ACTIONS : []));
+
+onMounted(async () => {
+  try {
+    const res = await getAttachmentConfig();
+    uploadEnabled.value = !!res.data?.enable;
+    maxSizeMB.value = res.data?.maxSizeMB ?? 0;
+  } catch {
+    // 取不到配置就按未开启处理，对话本身不受影响
+  }
+});
 
 /** 当前待发的附件列表，驱动 sender 的预览条。 */
 const pendingAttachments = ref<TdAttachmentItem[]>([]);
@@ -113,8 +128,8 @@ async function handleFileSelect({ files, name }: { files: File[]; name: string }
       MessagePlugin.warning(`「${file.name}」格式不支持，请上传图片、PDF、Word、Excel、PPT 或 TXT 文件`);
       continue;
     }
-    if (file.size > MAX_FILE_SIZE) {
-      MessagePlugin.warning(`「${file.name}」超过 10 MB 限制`);
+    if (maxSizeMB.value > 0 && file.size > maxSizeMB.value * 1024 * 1024) {
+      MessagePlugin.warning(`「${file.name}」超过 ${maxSizeMB.value} MB 限制`);
       continue;
     }
 
@@ -134,9 +149,8 @@ async function handleFileSelect({ files, name }: { files: File[]; name: string }
     try {
       const res = await uploadAttachment(file);
       const url = res.data?.url ?? '';
-      // 后端 transport=url 时返回 attachmentId，url 是有时效的预览地址：后端只认 ID，按字符串存
-      // （雪花 ID 超出 JS 安全整数），它也随展示消息落库，后端加载历史时按它把过期的 url 换新。
-      // transport=base64 时不返回 ID，url 是 data URL，发送时原样回传、由后端重新校验。
+      // url 是有时效的预览地址：后端只认 attachmentId，按字符串存（雪花 ID 超出 JS 安全整数），
+      // 它也随展示消息落库，后端加载历史时按它把过期的 url 换新。
       const attachmentId = res.data?.attachmentId ? String(res.data.attachmentId) : '';
       const metadata = attachmentId ? { attachmentId } : undefined;
       pendingAttachments.value = pendingAttachments.value.map((item) =>
@@ -167,7 +181,7 @@ function handleSend(prompt: string) {
 
   // 只取上传成功的附件传给 engine，过滤掉仍在上传中或失败的占位项。
   const attachments: SendAttachment[] = pendingAttachments.value
-    .filter((item) => (item.status as string) === 'success' && (item.metadata?.attachmentId || isDataURL(item.url)))
+    .filter((item) => (item.status as string) === 'success' && item.metadata?.attachmentId)
     .map((item) => ({
       // fileType 只影响气泡里的图标/预览；后端按 OSS 记录的文件名自行判定类型。
       fileType: (item.type === 'image' ? 'image' : 'txt') as 'image' | 'txt',
@@ -179,11 +193,6 @@ function handleSend(prompt: string) {
     }));
 
   emit('send', { prompt: text, attachments });
-}
-
-/** 后端 transport=base64 时附件以 data URL 回传。 */
-function isDataURL(url?: string) {
-  return !!url && url.startsWith('data:');
 }
 
 function handleStop() {

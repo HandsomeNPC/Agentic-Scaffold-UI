@@ -4,6 +4,7 @@ import request from '@/utils/request';
 
 import type {
   AbortVo,
+  AttachmentConfigVo,
   AttachmentUploadVo,
   DisplayMessagesVo,
   SaveMessagesRequest,
@@ -43,11 +44,14 @@ export const abortThread = (threadId: string): AxiosPromise<AbortVo> =>
 /** 对话流地址。交给 ChatEngine 作为 SSE endpoint。 */
 export const CHAT_ENDPOINT = `${import.meta.env.VITE_APP_BASE_API}/ai/threads/chat`;
 
+/** 附件上传配置，未开启时前端不显示上传按钮 */
+export const getAttachmentConfig = (): AxiosPromise<AttachmentConfigVo> =>
+  request({ url: '/ai/threads/attachments/config', method: 'get' });
+
 /**
  * 上传对话附件（不是 /resource/oss：那边跟着后台默认存储走）。
  * 走 multipart/form-data（axios 自动设置 Content-Type），不走 apiencrypt。
- * 后端 transport=url：传进专用私有桶，返回 attachmentId + 有时效的预签名地址（重新加载会话时后端会换新）；
- * transport=base64：不落存储，只校验并返回 data URL，发送时随消息原样回传。
+ * 传进专用私有桶，返回 attachmentId + 有时效的预签名地址（重新加载会话时后端会换新）。
  */
 export const uploadAttachment = (file: File): AxiosPromise<AttachmentUploadVo> => {
   const form = new FormData();
