@@ -29,7 +29,7 @@
 
 ## 项目介绍
 
-**带智能体的管理平台（前端）。** 在一套完整的 RuoYi 后台（用户 / 角色 / 菜单 / 部门 / 字典 / OSS / 监控……）上，
+**智能体驱动的高效管理系统（前端）。** 在一套完整的 RuoYi 后台（用户 / 角色 / 菜单 / 部门 / 字典 / OSS / 监控……）上，
 挂一个全局常驻的 **AI 对话侧边栏**：Agent 能查数据、能跳菜单、能改界面设置，敏感操作先弹确认卡片，用户批准后才执行。
 
 - **后端项目**：[Agentic-Scaffold-Backend](https://github.com/HandsomeNPC/Agentic-Scaffold-Backend)（Go + Gin + Eino ADK）
